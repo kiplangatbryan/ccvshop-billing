@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
     mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/zargar-invoice',
-    ccvShopApiUrl: process.env.CCV_SHOP_API_URL || 'https://demo.ccvshop.nl/API',
+    ccvShopApiUrl: process.env.CCV_SHOP_API_URL || 'https://inficom.ccvshop.nl',
     ccvShopApiKey: process.env.CCV_SHOP_API_KEY || '',
     ccvShopApiSecret: process.env.CCV_SHOP_API_SECRET || '',
     smtpHost: process.env.SMTP_HOST || '',

@@ -14,54 +14,56 @@ export interface CCVProduct {
 export async function fetchCCVProducts(): Promise<CCVProduct[]> {
   const config = useRuntimeConfig()
   const log = logger.child({ context: { service: 'ccvShop', operation: 'fetchProducts' } })
-  
+
   try {
-    const apiUrl = config.ccvShopApiUrl
+    const apiDomain = (config.ccvShopApiUrl || '').replace(/\/$/, '')
     const apiKey = config.ccvShopApiKey
     const apiSecret = config.ccvShopApiSecret
-    
-    // Generate hash for authentication (CCV Shop API typically uses hash-based auth)
-    const timestamp = Math.floor(Date.now() / 1000)
-    const hashString = `${apiKey}${apiSecret}${timestamp}`
-    const hash = crypto.createHash('sha256').update(hashString).digest('hex')
-    
-    // Fetch products from CCV Shop API
-    // Adjust endpoint based on actual API documentation
-    const response = await $fetch<any>(`${apiUrl}/products`, {
-      method: 'GET',
-      headers: {
-        'X-API-Key': apiKey,
-        'X-API-Hash': hash,
-        'X-API-Timestamp': timestamp.toString()
-      }
-    }).catch(async (error) => {
-      log.warn('Primary CCV products fetch failed, attempting unauthenticated fallback', { error })
-      // Fallback: try without auth if it's a demo endpoint
-      return await $fetch<any>(`${apiUrl}/products`, {
-        method: 'GET'
-      }).catch((fallbackError) => {
-        log.warn('Unauthenticated CCV products fetch failed, returning mock data', { error: fallbackError })
-        // Return mock data if API is not accessible
-        return {
-          products: [
-            { id: '1', name: 'Sample Product 1', price: 29.99, sku: 'SKU001', stock: 100 },
-            { id: '2', name: 'Sample Product 2', price: 49.99, sku: 'SKU002', stock: 50 }
-          ]
-        }
-      })
-    })
-    
-    // Normalize response based on API structure
-    let products: CCVProduct[] = []
-    if (Array.isArray(response)) {
-      products = response
-    } else if (response.products) {
-      products = response.products
-    } else if (response.data) {
-      products = response.data
+
+    if (!apiDomain || !apiKey || !apiSecret) {
+      throw new Error('Missing CCV Shop API credentials')
     }
-    
-    return products
+
+    const uriPath = '/api/rest/v1/products'
+    const endpoint = `${apiDomain}${uriPath}`
+    const method = 'GET'
+    const bodyString = ''
+
+    const { timestamp, hash } = buildCcvAuthSignature({
+      apiKey,
+      apiSecret,
+      method,
+      uriPath,
+      body: bodyString
+    })
+
+    const response = await $fetch<any>(endpoint, {
+      method,
+      headers: {
+        'x-public': apiKey,
+        'x-date': timestamp,
+        'x-hash': hash
+      }
+    })
+
+    // Normalize response based on API structure
+    const rawProducts: any[] = (() => {
+      if (Array.isArray(response)) {
+        return response
+      }
+      if (Array.isArray(response?.products)) {
+        return response.products
+      }
+      if (Array.isArray(response?.data)) {
+        return response.data
+      }
+      if (Array.isArray(response?.items)) {
+        return response.items
+      }
+      return []
+    })()
+
+    return rawProducts.map(normalizeCcvProduct)
   } catch (error) {
     log.error('Error fetching CCV products', { error })
     // Return empty array or mock data on error
@@ -72,47 +74,81 @@ export async function fetchCCVProducts(): Promise<CCVProduct[]> {
 export async function updateCCVProductStock(productId: string, quantity: number): Promise<boolean> {
   const config = useRuntimeConfig()
   const log = logger.child({ context: { service: 'ccvShop', operation: 'updateStock', productId, quantity } })
-  
+
   try {
-    const apiUrl = config.ccvShopApiUrl
+    const apiDomain = (config.ccvShopApiUrl || '').replace(/\/$/, '')
     const apiKey = config.ccvShopApiKey
     const apiSecret = config.ccvShopApiSecret
-    
-    // Generate hash for authentication
-    const timestamp = Math.floor(Date.now() / 1000)
-    const hashString = `${apiKey}${apiSecret}${timestamp}`
-    const hash = crypto.createHash('sha256').update(hashString).digest('hex')
-    
-    // Update product stock in CCV Shop API
-    // Adjust endpoint based on actual API documentation
-    await $fetch(`${apiUrl}/products/${productId}/stock`, {
-      method: 'PUT',
+
+    if (!apiDomain || !apiKey || !apiSecret) {
+      throw new Error('Missing CCV Shop API credentials')
+    }
+
+    const uriPath = `/api/rest/v1/products/${productId}`
+    const endpoint = `${apiDomain}${uriPath}`
+    const method = 'PATCH'
+    const bodyPayload = {
+      stock: quantity
+    }
+    const bodyString = JSON.stringify(bodyPayload)
+
+    const { timestamp, hash } = buildCcvAuthSignature({
+      apiKey,
+      apiSecret,
+      method,
+      uriPath,
+      body: bodyString
+    })
+
+    const response = await $fetch<any>(endpoint, {
+      method,
       headers: {
-        'X-API-Key': apiKey,
-        'X-API-Hash': hash,
-        'X-API-Timestamp': timestamp.toString(),
+        'x-public': apiKey,
+        'x-date': timestamp,
+        'x-hash': hash,
         'Content-Type': 'application/json'
       },
-      body: {
-        quantity: quantity
-      }
-    }).catch(async (error) => {
-      log.warn('Primary CCV stock update failed, attempting unauthenticated fallback', { error })
-      // Fallback: try without auth if it's a demo endpoint
-      await $fetch(`${apiUrl}/products/${productId}/stock`, {
-        method: 'PUT',
-        body: {
-          quantity: quantity
-        }
-      }).catch((fallbackError) => {
-        log.warn('Unauthenticated CCV stock update failed (likely demo API)', { error: fallbackError })
-      })
+      body: bodyPayload
     })
-    
-    return true
+
+    return Boolean(response)
   } catch (error) {
     log.error('Error updating CCV product stock', { error })
     return false
+  }
+}
+
+function buildCcvAuthSignature({
+  apiKey,
+  apiSecret,
+  method,
+  uriPath,
+  body
+}: {
+  apiKey: string
+  apiSecret: string
+  method: string
+  uriPath: string
+  body: string
+}) {
+  const timestamp = new Date().toISOString()
+  const normalizedMethod = method.toUpperCase()
+  const data = body || ''
+  const hashString = `${apiKey}|${normalizedMethod}|${uriPath}|${data}|${timestamp}`
+  const hash = crypto.createHmac('sha512', apiSecret).update(hashString).digest('hex')
+
+  return { timestamp, hash }
+}
+
+function normalizeCcvProduct(product: any): CCVProduct {
+  return {
+    id: String(product?.id ?? product?.product_id ?? ''),
+    name: product?.name ?? product?.title ?? '',
+    price: Number(product?.price ?? product?.salesprice ?? 0),
+    description: product?.shortdescription || product?.description || '',
+    stock: typeof product?.stock === 'number' ? product.stock : undefined,
+    sku: product?.productnumber || product?.sku || undefined,
+    quantity: typeof product?.stock === 'number' ? product.stock : undefined
   }
 }
 
