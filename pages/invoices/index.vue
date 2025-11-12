@@ -10,66 +10,61 @@
       </div>
     </header>
 
-    <div class="card-shell controls-bar">
-      <div class="controls-grid">
-        <div class="tw-relative tw-flex-1 tw-min-w-[220px]">
-          <svg
-            class="tw-absolute tw-left-3 tw-top-2.5 tw-w-4 tw-h-4 tw-text-gray-400"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            fill="none"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
-          </svg>
-          <input
+    <VSheet class="card-shell tw-space-y-4">
+      <VRow dense class="tw-gap-y-4">
+        <VCol cols="12" md="4">
+          <VTextField
             v-model="filters.search"
-            type="search"
-            placeholder="Search invoices or clients"
-            class="search-input tw-pl-9"
+            label="Search invoices or clients"
+            variant="outlined"
+            density="comfortable"
+            color="primary"
+            prepend-inner-icon="mdi-magnify"
+            clearable
           />
-        </div>
-        <select v-model="filters.status" class="filter-select tw-w-40 tw-min-w-[160px]">
-          <option value="all">All statuses</option>
-          <option value="draft">Draft</option>
-          <option value="sent">Sent</option>
-          <option value="partial">Partial</option>
-          <option value="paid">Paid</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <button class="btn btn-ghost" type="button" @click="showAdvanced = !showAdvanced">
-          {{ showAdvanced ? 'Hide filters' : 'Advanced filters' }}
-        </button>
+        </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VSelect
+            v-model="filters.status"
+            :items="statusItems"
+            item-title="label"
+            item-value="value"
+            label="Status"
+            variant="outlined"
+            density="comfortable"
+            color="primary"
+          />
+        </VCol>
+        <VCol cols="12" sm="6" md="2">
+          <VTextField
+            v-model="filters.dateFrom"
+            type="date"
+            label="From"
+            variant="outlined"
+            density="comfortable"
+            color="primary"
+          />
+        </VCol>
+        <VCol cols="12" sm="6" md="2">
+          <VTextField
+            v-model="filters.dateTo"
+            type="date"
+            label="To"
+            variant="outlined"
+            density="comfortable"
+            color="primary"
+          />
+        </VCol>
+      </VRow>
+      <div class="tw-flex tw-flex-wrap tw-gap-3 tw-justify-between tw-items-center">
+        <VBtn variant="text" color="secondary" prepend-icon="mdi-refresh" @click="resetFilters">
+          Reset
+        </VBtn>
+        <VBtn color="primary" prepend-icon="mdi-plus" :to="{ path: '/invoices/create' }">
+          New Invoice
+        </VBtn>
       </div>
-      <NuxtLink to="/invoices/create" class="btn btn-primary">New Invoice</NuxtLink>
-    </div>
-
-    <transition name="fade">
-      <div v-if="showAdvanced" class="card-shell tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-5">
-        <div>
-          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Date from</label>
-          <input v-model="filters.dateFrom" type="date" class="input-control" />
-        </div>
-        <div>
-          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Date to</label>
-          <input v-model="filters.dateTo" type="date" class="input-control" />
-        </div>
-        <div>
-          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Min total</label>
-          <input v-model.number="filters.minTotal" type="number" min="0" step="0.01" class="input-control" placeholder="0.00" />
-        </div>
-        <div>
-          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Max total</label>
-          <input v-model.number="filters.maxTotal" type="number" min="0" step="0.01" class="input-control" placeholder="Any" />
-        </div>
-        <div class="md:tw-col-span-2 xl:tw-col-span-1">
-          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Memo contains</label>
-          <input v-model="filters.memo" type="text" class="input-control" placeholder="Keyword" />
-        </div>
-        <div class="md:tw-col-span-2 xl:tw-col-span-5 tw-flex tw-justify-end tw-gap-3">
-          <button class="btn btn-ghost" type="button" @click="resetFilters">Reset</button>
-        </div>
-    </div>
-    </transition>
+    </VSheet>
 
     <section class="tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-4">
       <div
@@ -231,17 +226,22 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 const loading = ref(true)
 const invoices = ref<any[]>([])
 const selectedInvoice = ref<any | null>(null)
-const showAdvanced = ref(false)
 const $fetch = useRequestFetch()
+
+const statusItems = [
+  { label: 'All statuses', value: 'all' },
+  { label: 'Draft', value: 'draft' },
+  { label: 'Sent', value: 'sent' },
+  { label: 'Partial', value: 'partial' },
+  { label: 'Paid', value: 'paid' },
+  { label: 'Cancelled', value: 'cancelled' }
+]
 
 const filters = reactive({
   search: '',
   status: 'all',
   dateFrom: '',
-  dateTo: '',
-  minTotal: undefined as number | undefined,
-  maxTotal: undefined as number | undefined,
-  memo: ''
+  dateTo: ''
 })
 
 const summary = reactive({
@@ -273,20 +273,12 @@ const filteredInvoices = computed(() => {
     const matchesSearch = filters.search ? haystack.includes(filters.search.toLowerCase()) : true
 
     const matchesStatus = filters.status === 'all' ? true : invoice.status === filters.status
+ 
+     const issueDate = new Date(invoice.invoiceDate || invoice.createdAt)
+     const matchesFrom = filters.dateFrom ? issueDate >= new Date(filters.dateFrom) : true
+     const matchesTo = filters.dateTo ? issueDate <= new Date(filters.dateTo) : true
 
-    const issueDate = new Date(invoice.invoiceDate || invoice.createdAt)
-    const matchesFrom = filters.dateFrom ? issueDate >= new Date(filters.dateFrom) : true
-    const matchesTo = filters.dateTo ? issueDate <= new Date(filters.dateTo) : true
-
-    const total = Number(invoice.total) || 0
-    const matchesMin = typeof filters.minTotal === 'number' ? total >= filters.minTotal : true
-    const matchesMax = typeof filters.maxTotal === 'number' ? total <= filters.maxTotal : true
-
-    const matchesMemo = filters.memo
-      ? (invoice.memo || '').toLowerCase().includes(filters.memo.toLowerCase())
-      : true
-
-    return matchesSearch && matchesStatus && matchesFrom && matchesTo && matchesMin && matchesMax && matchesMemo
+    return matchesSearch && matchesStatus && matchesFrom && matchesTo
   })
 })
 
@@ -343,9 +335,6 @@ function resetFilters() {
   filters.status = 'all'
   filters.dateFrom = ''
   filters.dateTo = ''
-  filters.minTotal = undefined
-  filters.maxTotal = undefined
-  filters.memo = ''
 }
 
 function selectInvoice(invoice: any) {

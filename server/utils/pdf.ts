@@ -153,6 +153,17 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
 
   const docDefinition = {
     pageMargins: [40, 70, 40, 60],
+    background: invoice.status === 'paid'
+      ? (currentPage: number, pageSize: any) => ({
+          text: 'PAID',
+          color: '#16a34a',
+          opacity: 0.12,
+          bold: true,
+          fontSize: 140,
+          alignment: 'center',
+          margin: [0, pageSize.height / 2 - 70]
+        })
+      : undefined,
     content: [
       {
         columns: [
@@ -177,7 +188,7 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
       },
       {
         canvas: [
-          { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#e5e7eb' }
+          { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#d1d5db' }
         ],
         margin: [0, 10, 0, 10]
       },
@@ -194,8 +205,7 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
               body: [
                 [{ text: 'INVOICE NO.', style: 'metaLabel' }, { text: invoice.invoiceNumber, style: 'metaValue' }],
                 [{ text: 'DATE', style: 'metaLabel' }, { text: formatDate(invoice.invoiceDate || invoice.createdAt), style: 'metaValue' }],
-                [{ text: 'DUE DATE', style: 'metaLabel' }, { text: formatDate(invoice.dueDate), style: 'metaValue' }],
-                // [{ text: 'STATUS', style: 'metaLabel' }, { text: invoice.status.toUpperCase(), style: 'metaValue' }]
+                [{ text: 'DUE DATE', style: 'metaLabel' }, { text: formatDate(invoice.dueDate), style: 'metaValue' }]
               ]
             },
             layout: 'noBorders',
@@ -205,11 +215,10 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
       },
       {
         canvas: [
-          { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#e5e7eb' }
+          { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#d1d5db' }
         ],
-        margin: [0, 10, 0, 10]
+        margin: [0, 10, 0, 12]
       },
-      // { text: 'Activity', style: 'sectionHeader', margin: [0, 30, 0, 8] },
       {
         table: {
           headerRows: 1,
@@ -226,51 +235,55 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
           ]
         },
         layout: {
-          fillColor: (rowIndex: number) => (rowIndex === 0 ? '#f3f4f6' : null),
+          fillColor: (rowIndex: number) => (rowIndex === 0 ? '#f1f5f9' : null),
+          paddingLeft: (i: number) => (i === 0 ? 10 : 8),
+          paddingRight: () => 8,
+          paddingTop: (rowIndex: number) => (rowIndex === 0 ? 10 : 8),
+          paddingBottom: (rowIndex: number) => (rowIndex === 0 ? 10 : 8),
           hLineWidth: () => 0.5,
-          vLineWidth: () => 0.5,
-          hLineColor: () => '#e5e7eb',
-          vLineColor: () => '#e5e7eb'
+          vLineWidth: () => 0,
+          hLineColor: () => '#e2e8f0',
+          vLineColor: () => '#e2e8f0'
         }
       },
       {
         columns: [
           [
-            invoice.memo ? { text: `Notes:\n${invoice.memo}`, style: 'notes', margin: [0, 24, 0, 0] } : null
+            invoice.memo
+              ? { text: `Notes:\n${invoice.memo}`, style: 'notes', margin: [0, 24, 0, 0] }
+              : null,
+            invoice.terms
+              ? { text: `Terms & Conditions:\n${invoice.terms}`, style: 'notes', margin: [0, 16, 0, 0] }
+              : null
           ].filter(Boolean),
           {
-            width: 240,
+            width: 260,
             table: {
               widths: ['*', 'auto'],
               body: totalsRows.map((row) => [
-                { ...row.label, alignment: 'left' },
-                { ...row.value, alignment: 'right' }
+                { ...row.label, alignment: 'left', border: [false, false, false, false], margin: [0, 6, 0, 6] },
+                { ...row.value, alignment: 'right', border: [false, false, false, false], margin: [0, 6, 0, 6] }
               ])
             },
-            layout: {
-              hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length ? 0 : 0.5),
-              vLineWidth: () => 0,
-              hLineColor: () => '#e5e7eb'
-            },
+            layout: 'noBorders',
             margin: [0, 24, 0, 0]
           }
         ]
       },
-      vatSummary,
-      invoice.terms ? { text: `Terms & Conditions:\n${invoice.terms}`, style: 'notes', margin: [0, 24, 0, 0] } : null
+      vatSummary
     ].filter(Boolean),
     styles: {
-      companyName: { fontSize: 16, bold: true, color: '#1f2937' },
+      companyName: { fontSize: 18, bold: true, color: '#111827' },
       companyInfo: { fontSize: 9, color: '#4b5563', margin: [0, 2, 0, 0] },
-      metaLabel: { fontSize: 9, color: '#6b7280', bold: true, margin: [0, 2, 8, 2] },
-      metaValue: { fontSize: 10, color: '#111827', margin: [0, 2, 0, 2] },
-      sectionHeader: { fontSize: 12, bold: true, color: '#1f2937' },
+      metaLabel: { fontSize: 9, color: '#6b7280', bold: true, margin: [0, 2, 8, 2], letterSpacing: 0.6 },
+      metaValue: { fontSize: 11, color: '#111827', margin: [0, 2, 0, 2] },
+      sectionHeader: { fontSize: 11, bold: true, color: '#1f2937', letterSpacing: 1 },
       billToName: { fontSize: 11, bold: true, color: '#111827' },
       billToDetail: { fontSize: 10, color: '#4b5563' },
-      tableHeader: { fontSize: 10, bold: true, color: '#1f2937', padding: [2, 2, 2, 2] },
-      tableItemTitle: { fontSize: 10, bold: true, color: '#111827' },
+      tableHeader: { fontSize: 10, bold: true, color: '#1f2937', margin: [8, 0, 0, 0], letterSpacing: 0.4 },
+      tableItemTitle: { fontSize: 10.5, bold: true, color: '#111827' },
       tableItemSub: { fontSize: 9, color: '#6b7280', margin: [0, 2, 0, 0] },
-      notes: { fontSize: 9, color: '#4b5563' },
+      notes: { fontSize: 9.5, color: '#4b5563', lineHeight: 1.4 },
       summaryHeader: { fontSize: 9, bold: true, color: '#1f2937' }
     },
     defaultStyle: {
