@@ -21,7 +21,14 @@ export async function fetchCCVProducts(): Promise<CCVProduct[]> {
     const apiSecret = config.ccvShopApiSecret
 
     if (!apiDomain || !apiKey || !apiSecret) {
-      throw new Error('Missing CCV Shop API credentials')
+      log.error('Missing CCV Shop credentials', {
+        apiDomain,
+        hasApiKey: Boolean(apiKey),
+        hasApiSecret: Boolean(apiSecret)
+      })
+      throw new Error(
+        'Missing CCV Shop API credentials. Provide NUXT_CCV_SHOP_API_URL, NUXT_CCV_SHOP_API_KEY and NUXT_CCV_SHOP_API_SECRET environment variables.'
+      )
     }
 
     const uriPath = '/api/rest/v1/products'
@@ -81,7 +88,14 @@ export async function updateCCVProductStock(productId: string, quantity: number)
     const apiSecret = config.ccvShopApiSecret
 
     if (!apiDomain || !apiKey || !apiSecret) {
-      throw new Error('Missing CCV Shop API credentials')
+      log.error('Missing CCV Shop credentials for stock update', {
+        apiDomain,
+        hasApiKey: Boolean(apiKey),
+        hasApiSecret: Boolean(apiSecret)
+      })
+      throw new Error(
+        'Missing CCV Shop API credentials. Provide NUXT_CCV_SHOP_API_URL, NUXT_CCV_SHOP_API_KEY and NUXT_CCV_SHOP_API_SECRET environment variables.'
+      )
     }
 
     const uriPath = `/api/rest/v1/products/${productId}`

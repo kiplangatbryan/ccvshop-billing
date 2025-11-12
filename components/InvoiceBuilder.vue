@@ -338,44 +338,139 @@
     </div>
     </div>
 
-  <VDialog v-model="showProductSelector" max-width="900" scrollable>
-    <VCard>
-      <VCardTitle class="tw-flex tw-items-center tw-justify-between tw-gap-4">
-          <div>
-          <h3 class="tw-text-lg tw-font-semibold tw-text-gray-900">Import from CCV Shop</h3>
-          <p class="tw-text-sm tw-text-gray-500">Select products to convert directly into invoice line items.</p>
+  <VDialog v-model="showProductSelector" max-width="880" transition="dialog-bottom-transition" scrollable>
+    <VCard class="tw-rounded-[32px] tw-border tw-border-gray-100 tw-shadow-2xl tw-overflow-hidden">
+      <VCardText class="tw-pt-6 tw-px-6 tw-pb-0">
+        <div class="tw-flex tw-items-start tw-gap-3">
+          <div class="tw-h-11 tw-w-11 tw-rounded-full tw-bg-primary/10 tw-flex tw-items-center tw-justify-center">
+            <VIcon color="primary">mdi-storefront-outline</VIcon>
           </div>
-        <VBtn variant="text" color="secondary" @click="showProductSelector = false">
-            Close
-        </VBtn>
-      </VCardTitle>
-      <VCardText>
-        <div v-if="loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
-            Loading products...
+          <div class="tw-flex-1 tw-space-y-1">
+            <h3 class="tw-text-xl tw-font-semibold tw-text-gray-900">Import from CCV Shop</h3>
+            <p class="tw-text-sm tw-text-gray-500">
+              Browse your CCV catalogue and add a single unit to this invoice with one click.
+            </p>
           </div>
-        <div v-else-if="products.length === 0" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
-            No products available.
-          </div>
-        <div v-else class="tw-space-y-3">
-          <VSheet v-for="product in products" :key="product.id"
-            class="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border tw-border-gray-100 tw-rounded-2xl tw-px-4 tw-py-3 hover:tw-bg-gray-50 tw-transition">
-            <div class="tw-flex-1 tw-pr-4">
-              <p class="tw-font-medium tw-text-gray-900">{{ product.name }}</p>
-              <p class="tw-text-sm tw-text-gray-500">{{ formatCurrency(product.price, form.currency) }}</p>
-              <p v-if="product.stock !== undefined" class="tw-text-xs tw-text-gray-400">
-                  Stock: {{ product.stock }}
-                </p>
-              </div>
-            <div class="tw-flex tw-items-center tw-gap-2">
-              <VTextField v-model.number="productQuantities[product.id]" type="number" min="1" :max="product.stock"
-                label="Qty" variant="outlined" density="comfortable" color="primary" class="tw-w-24" />
-              <VBtn color="primary" variant="tonal" @click="addProduct(product)">
-                Add
-              </VBtn>
-              </div>
-          </VSheet>
-            </div>
+          <VBtn icon="mdi-close" variant="text" color="primary" @click="showProductSelector = false" />
+        </div>
       </VCardText>
+
+      <VCardText class="tw-px-6 tw-pt-4 tw-pb-6 tw-space-y-4">
+        <VAlert
+          v-if="productsLoaded && products.length === 0 && !loadingProducts"
+          type="info"
+          variant="tonal"
+          color="primary"
+          class="tw-rounded-2xl"
+        >
+          We couldn’t find any products in CCV Shop yet. Add some items to your store and try again.
+        </VAlert>
+
+        <VProgressCircular
+          v-else-if="loadingProducts"
+          indeterminate
+          color="primary"
+          class="tw-block tw-mx-auto tw-my-16"
+          size="48"
+          width="4"
+        />
+
+        <div class="tw-flex tw-flex-wrap tw-justify-between tw-items-center tw-gap-3">
+          <div>
+            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500">Select a product</p>
+            <p class="tw-text-sm tw-text-gray-500">Tap cards to select multiple products, then add them all at once.</p>
+          </div>
+
+          <VTextField
+            v-model="productSearch"
+            label="Search catalogue"
+            variant="outlined"
+            rounded="xl"
+            density="comfortable"
+            color="primary"
+            prepend-inner-icon="mdi-magnify"
+            clearable
+            class="tw-w-full md:tw-w-72"
+          />
+        </div>
+
+        <div v-if="filteredProducts.length === 0 && !loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
+          No products match your search.
+        </div>
+
+        <div v-else>
+          <VItemGroup v-model="selectedProductIds" multiple>
+            <VItem
+              v-for="product in filteredProducts"
+              :key="product.id"
+              :value="product.id"
+              v-slot="{ isSelected, toggle }"
+            >
+              <VSheet
+                class="tw-rounded-3xl tw-border tw-transition tw-shadow-sm hover:tw-shadow-lg tw-cursor-pointer tw-overflow-hidden tw-h-full"
+                :class="isSelected ? 'tw-border-primary tw-ring-2 tw-ring-primary/70 tw-bg-primary/5' : 'tw-border-gray-100 hover:tw-border-primary'"
+                @click="toggle"
+              >
+                <div class="tw-flex tw-items-start tw-gap-3 tw-px-4 tw-pt-4">
+                  <div
+                    class="tw-h-12 tw-w-12 tw-rounded-2xl tw-flex tw-items-center tw-justify-center tw-text-primary tw-font-semibold"
+                    :class="isSelected ? 'tw-bg-white' : 'tw-bg-primary/10'"
+                  >
+                    {{ productInitial(product) }}
+                  </div>
+                  <div class="tw-flex-1 tw-space-y-1">
+                    <div class="tw-flex tw-items-start tw-justify-between tw-gap-3">
+                      <div>
+                        <h4 class="tw-font-semibold tw-text-gray-900 tw-text-base">{{ product.name }}</h4>
+                        <p class="tw-text-sm tw-text-gray-500">
+                          {{ formatCurrency(product.price, form.currency) }}
+                          <span v-if="product.sku" class="tw-text-xs tw-text-gray-400 tw-ml-2">SKU • {{ product.sku }}</span>
+                        </p>
+                      </div>
+                      <VIcon v-if="isSelected" color="primary">mdi-check-circle</VIcon>
+                    </div>
+                    <VChip
+                      v-if="product.stock !== undefined"
+                      size="small"
+                      :color="product.stock > 0 ? 'success' : 'warning'"
+                      variant="flat"
+                    >
+                      {{ product.stock > 0 ? `${product.stock} in stock` : 'On request' }}
+                    </VChip>
+                  </div>
+                </div>
+                <div class="tw-px-4 tw-pb-4 tw-pt-3 tw-space-y-4">
+                  <p v-if="product.description" class="tw-text-sm tw-text-gray-500 tw-line-clamp-3">
+                    {{ product.description }}
+                  </p>
+                  <VBtn
+                    block
+                    :color="isSelected ? 'primary' : 'secondary'"
+                    variant="flat"
+                    class="tw-font-semibold tw-rounded-full tw-py-3"
+                    @click.stop="toggle"
+                  >
+                    {{ isSelected ? 'Selected' : 'Select' }}
+                  </VBtn>
+                </div>
+              </VSheet>
+            </VItem>
+          </VItemGroup>
+        </div>
+      </VCardText>
+      <VCardActions class="tw-px-6 tw-py-4 tw-border-t tw-border-gray-100 tw-justify-end">
+        <VBtn
+          color="primary"
+          class="tw-rounded-full tw-px-6 tw-font-semibold"
+          :disabled="!hasSelectedProducts"
+          @click="addSelectedProducts"
+        >
+          {{ hasSelectedProducts ? `Add ${selectedProductIds.length} item${selectedProductIds.length === 1 ? '' : 's'}` : 'Add selected' }}
+        </VBtn>
+        <VBtn variant="outlined" color="secondary" class="tw-rounded-full tw-px-6" @click="showProductSelector = false">
+          Close
+        </VBtn>
+      </VCardActions>
     </VCard>
   </VDialog>
 </template>
@@ -684,21 +779,49 @@ interface InvoiceItem {
 }
 
 const products = ref<any[]>([])
-const productQuantities = reactive<Record<string, number>>({})
-
 let productsLoaded = false
+const selectedProductIds = ref<string[]>([])
+
+const productSearch = ref('')
+const filteredProducts = computed(() => {
+  if (!productSearch.value) {
+    return products.value
+  }
+  const term = productSearch.value.toLowerCase()
+  return products.value.filter((product) => {
+    return (
+      product?.name?.toLowerCase().includes(term) ||
+      product?.description?.toLowerCase().includes(term) ||
+      product?.sku?.toLowerCase().includes(term)
+    )
+  })
+})
+
+const hasSelectedProducts = computed(() => selectedProductIds.value.length > 0)
+const selectedProducts = computed(() =>
+  products.value.filter((product) => selectedProductIds.value.includes(product.id))
+)
 
 onMounted(async () => {
-  if (!productsLoaded) {
-    loadProducts(true)
-  }
-
   if (isEdit.value) {
     await loadInvoiceForEdit()
   } else {
     ensureLineItemErrors()
   }
 })
+
+watch(
+  () => showProductSelector.value,
+  async (isOpen) => {
+    if (isOpen && !productsLoaded) {
+      await loadProducts(true)
+    }
+    if (!isOpen) {
+      selectedProductIds.value = []
+      productSearch.value = ''
+    }
+  }
+)
 
 const subtotal = computed(() =>
   form.items.reduce((sum: number, item: InvoiceItem) => sum + lineTotal(item), 0)
@@ -895,31 +1018,39 @@ async function loadInvoiceForEdit() {
   }
 }
 
-function addProduct(product: any) {
-  const quantity = productQuantities[product.id] || 1
+function addProductToInvoice(product: any, quantity = 1) {
   if (product.stock !== undefined && quantity > product.stock) {
-    alert('Quantity exceeds available stock')
-    return
+    alert(`Quantity exceeds available stock (${product.stock}).`)
+    return false
   }
-  
-  form.items.push({
-    productId: product.id,
-    productName: product.name,
-    description: product.description || '',
-    quantity,
-    price: product.price,
-    area: calculateArea({
-      length: carpetDefaults.length ?? null,
-      width: carpetDefaults.width ?? null
-    }),
-    sizeLabel: carpetDefaults.sizeLabel || undefined,
-    length: carpetDefaults.length ?? undefined,
-    width: carpetDefaults.width ?? undefined,
-    origin: carpetDefaults.origin || undefined
-  })
 
-  productQuantities[product.id] = 1
-  showProductSelector.value = false
+  const existingIndex = form.items.findIndex((item) => item.productId === product.id)
+  if (existingIndex >= 0) {
+    const existingItem = form.items[existingIndex]
+    form.items[existingIndex] = {
+      ...existingItem,
+      quantity: existingItem.quantity + quantity,
+      price: product.price,
+      description: product.description || existingItem.description || ''
+    }
+  } else {
+    form.items.push({
+      productId: product.id,
+      productName: product.name,
+      description: product.description || '',
+      quantity,
+      price: product.price,
+      area: calculateArea({
+        length: carpetDefaults.length ?? null,
+        width: carpetDefaults.width ?? null
+      }),
+      sizeLabel: carpetDefaults.sizeLabel || undefined,
+      length: carpetDefaults.length ?? undefined,
+      width: carpetDefaults.width ?? undefined,
+      origin: carpetDefaults.origin || undefined
+    })
+  }
+
   ensureLineItemErrors()
   if (fieldErrors.items) {
     fieldErrors.items = ''
@@ -929,6 +1060,23 @@ function addProduct(product: any) {
     name: product.name,
     items: form.items.length
   })
+  return true
+}
+
+function addSelectedProducts() {
+  if (!hasSelectedProducts.value) return
+
+  selectedProducts.value.forEach((product) => {
+    addProductToInvoice(product, 1)
+  })
+
+  selectedProductIds.value = []
+  showProductSelector.value = false
+}
+
+function productInitial(product: any) {
+  if (!product?.name) return 'P'
+  return product.name.trim().charAt(0).toUpperCase()
 }
 
 function addEmptyItem() {

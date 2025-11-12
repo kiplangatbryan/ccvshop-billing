@@ -3,7 +3,7 @@
     <header class="auth-nav">
       <NuxtLink to="/" class="auth-brand">
         <span class="brand-mark">ZI</span>
-        <span>Zargar Invoice</span>
+        <span>Z|Invoice</span>
       </NuxtLink>
       <div class="auth-links">
         <NuxtLink to="/register" class="link">Register</NuxtLink>
@@ -15,16 +15,21 @@
         <h1>Log in to your account</h1>
         <p>Access your invoices, clients, and payment tracking.</p>
 
-        <form @submit.prevent="handleLogin" class="auth-form">
+        <VForm @submit.prevent="handleLogin" class="auth-form">
           <div>
             <label for="email">Email address</label>
-            <input
+            <VTextField
               id="email"
               v-model="email"
               type="email"
-              required
-              class="input-control"
+              variant="outlined"
+              density="comfortable"
+              color="primary"
+              prepend-inner-icon="mdi-email-outline"
+              class="tw-rounded-xl"
               placeholder="you@example.com"
+              autocomplete="email"
+              required
             />
           </div>
 
@@ -33,51 +38,35 @@
               <label for="password">Password</label>
               <a href="#" class="link subtle">Forgot password?</a>
             </div>
-            <div class="password-field">
-              <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                required
-                class="input-control"
-                placeholder="••••••••"
-              />
-              <button type="button" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-                <svg
-                  v-if="showPassword"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="tw-w-5 tw-h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3l18 18M10.477 10.478A3 3 0 0113.5 13.5m-1.5 4.5a9.77 9.77 0 01-4.2-.94m-3.4-2.69A9.876 9.876 0 012.25 12c1.2-3.5 4.8-6 9.75-6 1.31 0 2.56.19 3.72.54M21.75 12a9.876 9.876 0 01-2.25 3.37m-3.03 2.26A9.77 9.77 0 0112 18" />
-                </svg>
-                <svg
-                  v-else
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="tw-w-5 tw-h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <circle cx="12" cy="12" r="3" stroke-width="1.5" />
-                  <path stroke-linecap="round" stroke-width="1.5" d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" />
-                </svg>
-              </button>
-            </div>
+            <VTextField
+              id="password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              variant="outlined"
+              density="comfortable"
+              color="primary"
+              prepend-inner-icon="mdi-lock-outline"
+              :append-inner-icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+              @click:append-inner="showPassword = !showPassword"
+              class="tw-rounded-xl"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
           </div>
 
-          <div v-if="error" class="auth-error">{{ error }}</div>
+          <VAlert v-if="error" type="error" variant="tonal" class="tw-rounded-2xl">
+            {{ error }}
+          </VAlert>
 
-          <button type="submit" class="btn btn-primary tw-w-full" :disabled="loading">
+          <VBtn type="submit" color="primary" block class="tw-rounded-full tw-font-semibold tw-py-3" :loading="loading">
             <span v-if="loading">Signing in…</span>
             <span v-else>Log in</span>
-          </button>
-        </form>
+          </VBtn>
+        </VForm>
 
         <p class="auth-footer">
-          New to Zargar Invoice?
+          New to Z|Invoice?
           <NuxtLink to="/register" class="link">Create an account</NuxtLink>
         </p>
       </div>
@@ -91,6 +80,8 @@ import { definePageMeta, useRouter } from '#imports'
 import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({ layout: false })
+
+type LoginError = { data?: { message?: string } }
 
 const { login } = useAuth()
 const router = useRouter()
@@ -107,9 +98,10 @@ const handleLogin = async () => {
 
   try {
     await login(email.value, password.value)
-    await router.push('/dashboard')
-  } catch (err: any) {
-    error.value = err.data?.message || 'Login failed. Please check your credentials.'
+    await router.push('/invoices')
+  } catch (err) {
+    const e = err as LoginError
+    error.value = e.data?.message || 'Login failed. Please check your credentials.'
   } finally {
     loading.value = false
   }

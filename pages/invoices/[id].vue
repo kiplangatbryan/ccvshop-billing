@@ -209,21 +209,23 @@
     </div>
   </div>
 
-  <VDialog v-model="showPaymentModal" max-width="600" transition="dialog-bottom-transition">
-    <VCard class="tw-rounded-3xl tw-overflow-hidden">
-      <div class="tw-bg-gradient-to-r tw-from-orange-500 tw-to-red-500 tw-px-6 tw-py-5 tw-text-white">
-        <div class="tw-flex tw-justify-between tw-items-start tw-gap-4">
-          <div class="tw-space-y-1">
-            <p class="tw-text-xs tw-uppercase tw-tracking-[0.2em] tw-opacity-80">Outstanding Balance</p>
-            <p class="tw-text-3xl tw-font-semibold">{{ formatCurrency(outstanding) }}</p>
-            <p class="tw-text-sm tw-opacity-80">Record a payment to reduce the balance.</p>
-          </div>
-          <VBtn icon="mdi-close" variant="text" color="white" @click="closePaymentModal" />
-        </div>
-      </div>
-
+  <VDialog v-model="showPaymentModal" max-width="640" transition="dialog-bottom-transition">
+    <VCard class="tw-rounded-[32px] tw-border tw-border-gray-100 tw-shadow-2xl tw-overflow-hidden">
       <VForm @submit.prevent="submitPayment">
-        <VCardText class="tw-space-y-5 tw-bg-white tw-py-6">
+        <VCardText class="tw-pt-6 tw-px-6 tw-space-y-6">
+          <div class="tw-flex tw-items-start tw-gap-3">
+            <div class="tw-h-11 tw-w-11 tw-rounded-full tw-bg-primary/10 tw-flex tw-items-center tw-justify-center">
+              <VIcon color="primary">mdi-cash-plus</VIcon>
+            </div>
+            <div class="tw-flex-1 tw-space-y-1">
+              <h3 class="tw-text-xl tw-font-semibold tw-text-gray-900">Record Payment</h3>
+              <p class="tw-text-sm tw-text-gray-500">
+                Outstanding balance: <span class="tw-font-semibold tw-text-gray-900">{{ formatCurrency(outstanding) }}</span>
+              </p>
+            </div>
+            <VBtn icon="mdi-close" variant="text" color="primary" @click="closePaymentModal" />
+          </div>
+
           <VRow>
             <VCol cols="12" md="6">
               <VTextField
@@ -233,6 +235,7 @@
                 min="0"
                 step="0.01"
                 variant="outlined"
+                rounded="xl"
                 density="comfortable"
                 color="primary"
                 prepend-inner-icon="mdi-cash"
@@ -247,6 +250,7 @@
                 item-value="value"
                 label="Method"
                 variant="outlined"
+                rounded="xl"
                 density="comfortable"
                 color="primary"
                 prepend-inner-icon="mdi-bank"
@@ -257,6 +261,7 @@
                 v-model="paymentForm.reference"
                 label="Reference"
                 variant="outlined"
+                rounded="xl"
                 density="comfortable"
                 color="primary"
                 prepend-inner-icon="mdi-pound"
@@ -268,6 +273,7 @@
                 label="Payment Date"
                 type="date"
                 variant="outlined"
+                rounded="xl"
                 density="comfortable"
                 color="primary"
                 prepend-inner-icon="mdi-calendar"
@@ -280,15 +286,23 @@
             rows="3"
             auto-grow
             variant="outlined"
+            rounded="xl"
             density="comfortable"
             color="primary"
             prepend-inner-icon="mdi-note-text"
           />
         </VCardText>
-        <VDivider />
-        <VCardActions class="tw-bg-white tw-px-6 tw-py-4 tw-justify-end tw-gap-2">
-          <VBtn variant="text" color="secondary" @click="closePaymentModal">Cancel</VBtn>
-          <VBtn color="primary" type="submit" class="tw-font-semibold" :loading="savingPayment" :disabled="savingPayment">
+        <VCardActions class="tw-px-6 tw-pb-6 tw-pt-2 tw-justify-end tw-gap-3">
+          <VBtn variant="outlined" color="secondary" class="tw-rounded-full tw-px-6" @click="closePaymentModal">
+            Cancel
+          </VBtn>
+          <VBtn
+            color="primary"
+            type="submit"
+            class="tw-rounded-full tw-px-6 tw-font-semibold"
+            :loading="savingPayment"
+            :disabled="savingPayment"
+          >
             Save Payment
           </VBtn>
         </VCardActions>

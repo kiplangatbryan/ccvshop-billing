@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <header class="top-nav">
-      <NuxtLink to="/dashboard" class="brand">
+      <NuxtLink to="/invoices" class="brand">
         <span class="brand-mark">ZI</span>
         <span class="brand-name">Zargar</span>
       </NuxtLink>
@@ -22,10 +22,6 @@
         <span class="user-label">Hi, {{ user.name || 'System Admin' }}</span>
         <button class="btn-ghost" @click="handleLogout">Log out</button>
       </div>
-      <div class="nav-auth" v-else>
-        <NuxtLink to="/login" class="link">Log in</NuxtLink>
-        <NuxtLink to="/register" class="btn btn-primary">Register</NuxtLink>
-      </div>
     </header>
 
     <main class="page-container">
@@ -42,7 +38,6 @@ const { user, logout } = useAuth()
 const router = useRouter()
 
 const navItems = [
-  { label: 'Overview', to: '/dashboard' },
   { label: 'Invoices', to: '/invoices' },
   { label: 'Create Invoice', to: '/invoices/create' },
   { label: 'Company Settings', to: '/settings/company' }
