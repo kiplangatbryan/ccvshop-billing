@@ -1,368 +1,364 @@
 <template>
-  <div class="page-shell space-y-8">
+  <div class="page-shell tw-space-y-8">
     <div class="page-header">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#22c55e]">Create</p>
+        <p class="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[#b91c1c]">Create</p>
         <h1>New Invoice</h1>
-        <p class="text-gray-500 mt-2">Capture client details, line items, and payment expectations while previewing the final invoice in real time.</p>
+        <p class="tw-text-gray-500 tw-mt-2">
+          Capture client details, line items, and payment expectations while previewing the final invoice in real time.
+        </p>
       </div>
-      <div class="flex items-center gap-3 flex-wrap">
-        <button type="button" class="btn btn-ghost" @click="prefillDemo()">Load sample data</button>
-        <button type="button" class="btn btn-ghost" @click="saveDraft">Save draft</button>
-        <button type="button" class="btn btn-primary" @click="submitInvoice(true)" :disabled="submitting || disabledSubmit">
-          <span v-if="submitting">Sending...</span>
-          <span v-else>Save &amp; send</span>
-        </button>
+      <div class="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
+        <VBtn variant="text" color="primary" @click="prefillDemo" prepend-icon="mdi-clipboard-play-outline">
+          Load sample data
+        </VBtn>
       </div>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[0.85fr,1fr]">
-      <form @submit.prevent class="space-y-5">
-        <section class="card-shell space-y-5">
-          <div>
-            <h2 class="text-lg font-semibold text-gray-900">Invoice information</h2>
-            <p class="text-sm text-gray-500">Reference details shown on the invoice header.</p>
-          </div>
-          <div class="grid gap-4 md:grid-cols-3">
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Invoice number *</label>
-              <input v-model="form.invoiceNumber" type="text" required class="input-control" placeholder="INV-100045" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Currency</label>
-              <select v-model="form.currency" class="input-control">
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="CAD">CAD ($)</option>
-                <option value="AED">AED (د.إ)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Tax rate (%)</label>
-              <input v-model.number="form.taxRate" type="number" min="0" step="0.1" class="input-control" placeholder="0" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Invoice date</label>
-              <input v-model="form.invoiceDate" type="date" class="input-control" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Due date</label>
-              <input v-model="form.dueDate" type="date" class="input-control" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Payment terms</label>
-              <input v-model="form.terms" type="text" class="input-control" placeholder="Net 30" />
-            </div>
-          </div>
-          <div>
-            <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Memo (visible to client)</label>
-            <textarea v-model="form.memo" rows="3" class="input-control" placeholder="Thank you for your business. Please include invoice number with payment." />
-          </div>
-        </section>
+    <div class="tw-grid tw-gap-6 xl:tw-grid-cols-[1fr,1fr]">
+      <VForm class="tw-space-y-6" @submit.prevent>
+        <VStepper v-model="currentStep" flat bg-color="transparent" class="tw-bg-transparent tw-shadow-none">
+          <VStepperHeader class="tw-bg-transparent tw-px-0">
+            <VStepperItem v-for="(step, index) in steps" :key="step.id" :value="String(index)" :title="step.label"
+              :subtitle="step.hint" :complete="index < currentStepIndex" :editable="index <= currentStepIndex"
+              :color="index <= currentStepIndex ? 'primary' : undefined" class="tw-px-0" />
+          </VStepperHeader>
 
-        <section class="card-shell space-y-5">
-          <div>
-            <h2 class="text-lg font-semibold text-gray-900">Bill to</h2>
-            <p class="text-sm text-gray-500">Specify who will receive this invoice.</p>
-          </div>
-          <div class="grid gap-4 md:grid-cols-2">
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Client name *</label>
-              <input v-model="form.customerName" type="text" required class="input-control" placeholder="Acme Corporation" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Client email *</label>
-              <input v-model="form.customerEmail" type="email" required class="input-control" placeholder="billing@acme.com" />
-            </div>
-            <div class="md:col-span-2">
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Client address</label>
-              <textarea v-model="form.customerAddress" rows="3" class="input-control" placeholder="Street, City, Country" />
-            </div>
-          </div>
-        </section>
-
-        <section class="card-shell space-y-5">
-          <div class="flex items-center justify-between">
-          <div>
-              <h2 class="text-lg font-semibold text-gray-900">Carpet defaults</h2>
-              <p class="text-sm text-gray-500">Prefill metadata applied to newly added line items.</p>
-            </div>
-            <button type="button" class="btn btn-ghost" @click="resetCarpetDefaults">Reset</button>
-          </div>
-          <div class="grid gap-4 md:grid-cols-4">
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Label</label>
-              <input v-model="carpetDefaults.sizeLabel" type="text" class="input-control" placeholder="8x10" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Length (m)</label>
-              <input v-model.number="carpetDefaults.length" type="number" min="0" step="0.01" class="input-control" placeholder="2.5" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Width (m)</label>
-              <input v-model.number="carpetDefaults.width" type="number" min="0" step="0.01" class="input-control" placeholder="1.7" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Origin</label>
-              <input v-model="carpetDefaults.origin" type="text" class="input-control" placeholder="Persian" />
-        </div>
-      </div>
-        </section>
-
-        <section class="card-shell space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-              <h2 class="text-lg font-semibold text-gray-900">Line items</h2>
-              <p class="text-sm text-gray-500">Capture quantity, pricing, and carpet metadata per item.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" class="btn btn-ghost" @click="showProductSelector = true">Import from CCV Shop</button>
-              <button type="button" class="btn btn-ghost" @click="addEmptyItem">+ Add custom item</button>
-            </div>
-        </div>
-
-          <div v-if="form.items.length === 0" class="border-2 border-dashed border-gray-200 rounded-xl py-12 text-center text-sm text-gray-500">
-            No items yet. Import from CCV Shop or add a custom entry.
-        </div>
-
-          <div v-else class="space-y-4">
-          <div
-            v-for="(item, index) in form.items"
-            :key="index"
-              class="rounded-xl border border-gray-100 bg-white p-4 space-y-4"
-          >
-              <div class="flex justify-between items-start gap-4">
-            <div class="flex-1">
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Item name *</label>
-                  <input v-model="item.productName" type="text" required class="input-control" placeholder="Vintage wool rug" />
+          <VStepperWindow class="tw-pt-6 tw-space-y-6">
+            <VStepperWindowItem value="0">
+              <section class="card-shell tw-space-y-5">
+                <div>
+                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoice information</h2>
+                  <p class="tw-text-sm tw-text-gray-500">Reference details shown on the invoice header.</p>
                 </div>
-                <button type="button" class="btn btn-ghost" @click="removeItem(index)">Remove</button>
+                <VRow dense>
+                  <VCol cols="12" md="4">
+                    <VTextField v-model="form.invoiceNumber" label="Invoice number" variant="outlined"
+                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.invoiceNumber)"
+                      :error-messages="fieldErrors.invoiceNumber ? [fieldErrors.invoiceNumber] : []" />
+                  </VCol>
+                  <VCol cols="12" md="4">
+                    <VSelect v-model="form.currency" :items="currencyItems" label="Currency" variant="outlined"
+                      density="comfortable" color="primary" />
+                  </VCol>
+                  <VCol cols="12" md="4">
+                    <VTextField v-model.number="form.taxRate" type="number" min="0" step="0.1" label="Tax rate (%)"
+                      variant="outlined" density="comfortable" color="primary" />
+                  </VCol>
+                  <VCol cols="12" md="4">
+                    <VTextField v-model="form.invoiceDate" type="date" label="Invoice date" variant="outlined"
+                      density="comfortable" color="primary" />
+                  </VCol>
+                  <VCol cols="12" md="4">
+                    <VTextField v-model="form.dueDate" type="date" label="Due date" variant="outlined"
+                      density="comfortable" color="primary" />
+                  </VCol>
+                  <VCol cols="12" md="4">
+                    <VTextField v-model="form.terms" label="Payment terms" placeholder="Net 30" variant="outlined"
+                      density="comfortable" color="primary" />
+                  </VCol>
+                </VRow>
+                <VTextarea v-model="form.memo" label="Memo (visible to client)" rows="3" auto-grow variant="outlined"
+                  density="comfortable" color="primary"
+                  placeholder="Thank you for your business. Please include invoice number with payment." />
+              </section>
+            </VStepperWindowItem>
+
+            <VStepperWindowItem value="1">
+              <section class="card-shell tw-space-y-5">
+                <div>
+                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Bill to</h2>
+                  <p class="tw-text-sm tw-text-gray-500">Specify who will receive this invoice.</p>
+                </div>
+                <VRow dense>
+                  <VCol cols="12" md="6">
+                    <VTextField v-model="form.customerName" label="Client name" variant="outlined" density="comfortable"
+                      color="primary" required :error="Boolean(fieldErrors.customerName)"
+                      :error-messages="fieldErrors.customerName ? [fieldErrors.customerName] : []" />
+                  </VCol>
+                  <VCol cols="12" md="6">
+                    <VTextField v-model="form.customerEmail" type="email" label="Client email" variant="outlined"
+                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.customerEmail)"
+                      :error-messages="fieldErrors.customerEmail ? [fieldErrors.customerEmail] : []" />
+                  </VCol>
+                  <VCol cols="12">
+                    <VTextarea v-model="form.customerAddress" label="Client address" rows="3" auto-grow
+                      variant="outlined" density="comfortable" color="primary" placeholder="Street, City, Country" />
+                  </VCol>
+                </VRow>
+              </section>
+            </VStepperWindowItem>
+
+            <VStepperWindowItem value="2">
+              <div class="tw-space-y-6">
+                <section class="card-shell tw-space-y-5">
+                  <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+                    <div>
+                      <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Carpet defaults</h2>
+                      <p class="tw-text-sm tw-text-gray-500">Prefill metadata applied to newly added line items.</p>
+                    </div>
+                    <VBtn variant="text" color="secondary" @click="resetCarpetDefaults">
+                      Reset
+                    </VBtn>
+                  </div>
+                  <VRow dense>
+                    <VCol cols="12" md="3">
+                      <VTextField v-model="carpetDefaults.sizeLabel" label="Label" variant="outlined"
+                        density="comfortable" color="primary" placeholder="8x10" />
+                    </VCol>
+                    <VCol cols="12" md="3">
+                      <VTextField v-model.number="carpetDefaults.length" type="number" min="0" step="0.01"
+                        label="Length (m)" variant="outlined" density="comfortable" color="primary" placeholder="2.5" />
+                    </VCol>
+                    <VCol cols="12" md="3">
+                      <VTextField v-model.number="carpetDefaults.width" type="number" min="0" step="0.01"
+                        label="Width (m)" variant="outlined" density="comfortable" color="primary" placeholder="1.7" />
+                    </VCol>
+                    <VCol cols="12" md="3">
+                      <VTextField v-model="carpetDefaults.origin" label="Origin" variant="outlined"
+                        density="comfortable" color="primary" placeholder="Persian" />
+                    </VCol>
+                  </VRow>
+                </section>
+
+                <section class="card-shell tw-space-y-6">
+                  <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+                    <div>
+                      <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Line items</h2>
+                      <p class="tw-text-sm tw-text-gray-500">Capture quantity, pricing, and carpet metadata per item.
+                      </p>
+                    </div>
+                    <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                      <VBtn variant="text" color="secondary" @click="showProductSelector = true">
+                        Import from CCV Shop
+                      </VBtn>
+                      <VBtn variant="tonal" color="primary" @click="addEmptyItem">
+                        + Add custom item
+                      </VBtn>
+                    </div>
+                  </div>
+
+                  <VAlert v-if="fieldErrors.items" type="error" variant="tonal" density="comfortable"
+                    class="tw-rounded-2xl">
+                    {{ fieldErrors.items }}
+                  </VAlert>
+
+                  <div v-if="form.items.length === 0"
+                    class="tw-border-2 tw-border-dashed tw-border-gray-200 tw-rounded-2xl tw-py-12 tw-text-center tw-text-sm tw-text-gray-500">
+                    No items yet. Import from CCV Shop or add a custom entry.
+                  </div>
+
+                  <div v-else class="tw-space-y-4">
+                    <VCard v-for="(item, index) in form.items" :key="index" variant="outlined"
+                      class="tw-rounded-2xl tw-space-y-4">
+                      <VCardText class="tw-space-y-4">
+                        <div class="tw-flex tw-flex-wrap tw-items-start tw-gap-4">
+                          <div class="tw-flex-1">
+                            <VTextField v-model="item.productName" label="Item name" variant="outlined"
+                              density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.productName)" :error-messages="fieldErrors.lineItems[index]?.productName
+                                ? [fieldErrors.lineItems[index]?.productName]
+                                : []
+                                " />
+                          </div>
+                          <VBtn variant="text" color="error" class="tw-self-start" @click="removeItem(index)">
+                            Remove
+                          </VBtn>
+                        </div>
+
+                        <VTextarea v-model="item.description" label="Description" rows="2" auto-grow variant="outlined"
+                          density="comfortable" color="primary" placeholder="Describe materials, weave, or condition" />
+
+                        <VRow dense>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model.number="item.quantity" type="number" min="1" label="Quantity"
+                              variant="outlined" density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.quantity)" :error-messages="fieldErrors.lineItems[index]?.quantity
+                                ? [fieldErrors.lineItems[index]?.quantity]
+                                : []
+                                " />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model.number="item.price" type="number" min="0" step="0.01" label="Unit price"
+                              variant="outlined" density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.price)" :error-messages="fieldErrors.lineItems[index]?.price
+                                ? [fieldErrors.lineItems[index]?.price]
+                                : []
+                                " />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model="item.sizeLabel" label="Size label" variant="outlined"
+                              density="comfortable" color="primary" :placeholder="carpetDefaults.sizeLabel || '8x10'" />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model="item.origin" label="Origin" variant="outlined" density="comfortable"
+                              color="primary" :placeholder="carpetDefaults.origin || 'Persian'" />
+                          </VCol>
+                        </VRow>
+
+                        <VRow dense>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model.number="item.length" type="number" min="0" step="0.01"
+                              label="Length (m)" variant="outlined" density="comfortable" color="primary"
+                              @blur="recalculateItemTotals(item)" />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField v-model.number="item.width" type="number" min="0" step="0.01" label="Width (m)"
+                              variant="outlined" density="comfortable" color="primary"
+                              @blur="recalculateItemTotals(item)" />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField :value="formatArea(item)" label="Area (m²)" variant="outlined"
+                              density="comfortable" color="primary" readonly />
+                          </VCol>
+                          <VCol cols="12" md="3">
+                            <VTextField :value="formatCurrency(lineTotal(item), form.currency)" label="Line total"
+                              variant="outlined" density="comfortable" color="primary" readonly />
+                          </VCol>
+                        </VRow>
+                      </VCardText>
+                    </VCard>
+                  </div>
+                </section>
               </div>
-              <div>
-                <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Description</label>
-                <textarea v-model="item.description" rows="2" class="input-control" placeholder="Describe materials, weave, or condition" />
-              </div>
-              <div class="grid gap-4 md:grid-cols-4">
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Quantity *</label>
-                  <input v-model.number="item.quantity" type="number" min="1" required class="input-control" />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Unit price *</label>
-                  <input v-model.number="item.price" type="number" min="0" step="0.01" required class="input-control" />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Size label</label>
-                  <input v-model="item.sizeLabel" type="text" class="input-control" :placeholder="carpetDefaults.sizeLabel || '8x10'" />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Origin</label>
-                  <input v-model="item.origin" type="text" class="input-control" :placeholder="carpetDefaults.origin || 'Persian'" />
-                </div>
-              </div>
-              <div class="grid gap-4 md:grid-cols-4">
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Length (m)</label>
-                  <input v-model.number="item.length" type="number" min="0" step="0.01" class="input-control" />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Width (m)</label>
-                  <input v-model.number="item.width" type="number" min="0" step="0.01" class="input-control" />
-                </div>
-                <div class="md:col-span-2 flex items-center justify-end text-sm text-gray-600">
-                  Line total
-                  <span class="ml-2 font-semibold text-gray-900">{{ formatCurrency(lineTotal(item), form.currency) }}</span>
-            </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </VStepperWindowItem>
 
-        <section class="card-shell space-y-5">
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="space-y-4">
-              <div>
-                <h3 class="text-sm font-semibold uppercase text-gray-500">Discounts</h3>
-                <p class="text-xs text-gray-500">Apply percentage or fixed amount discounts.</p>
+            <VStepperWindowItem value="3">
+              <div class="tw-space-y-5">
+                <section class="card-shell tw-space-y-4">
+                  <div>
+                    <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Discounts</h2>
+                    <p class="tw-text-sm tw-text-gray-500">Apply percentage or fixed amount discounts.</p>
+                  </div>
+                  <VRow dense>
+                    <VCol cols="12" md="6">
+                      <VSelect v-model="form.discountType" :items="discountTypeItems" label="Discount type"
+                        variant="outlined" density="comfortable" color="primary" />
+                    </VCol>
+                    <VCol cols="12" md="6">
+                      <VTextField v-model.number="form.discount" type="number" min="0" step="0.01"
+                        :label="form.discountType === 'amount' ? 'Value (fixed)' : 'Value (%)'" variant="outlined"
+                        density="comfortable" color="primary"
+                        :placeholder="form.discountType === 'amount' ? '0.00' : '0%'" />
+                    </VCol>
+                  </VRow>
+                </section>
+
+                <section class="card-shell tw-space-y-3">
+                  <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
+                    <span>Subtotal</span>
+                    <span>{{ formatCurrency(subtotal, form.currency) }}</span>
+                  </div>
+                  <div v-if="form.discountAmount > 0" class="tw-flex tw-items-center tw-justify-between tw-text-sm">
+                    <span>Discount</span>
+                    <span class="tw-text-emerald-600">-{{ formatCurrency(form.discountAmount, form.currency) }}</span>
+                  </div>
+                  <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
+                    <span>Tax ({{ form.taxRate }}%)</span>
+                    <span>{{ formatCurrency(taxAmount, form.currency) }}</span>
+                  </div>
+                  <div
+                    class="tw-flex tw-items-center tw-justify-between tw-text-base tw-font-semibold tw-text-gray-900">
+                    <span>Total due</span>
+                    <span>{{ formatCurrency(total, form.currency) }}</span>
+                  </div>
+                </section>
               </div>
-              <div class="grid gap-3 md:grid-cols-2">
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Discount Type</label>
-                  <select v-model="form.discountType" class="input-control">
-                    <option value="amount">Fixed amount</option>
-                    <option value="percent">Percentage</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Value</label>
-                  <input
-                    v-model.number="form.discount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="input-control"
-                    :placeholder="form.discountType === 'amount' ? '0.00' : '0%'"
-                  />
-          </div>
-        </div>
-      </div>
+            </VStepperWindowItem>
+          </VStepperWindow>
 
-            <div class="space-y-4">
-              <div>
-                <h3 class="text-sm font-semibold uppercase text-gray-500">Initial payment</h3>
-                <p class="text-xs text-gray-500">Record upfront payments received before sending.</p>
+          <VStepperActions class="tw-pt-4">
+            <template #prev>
+              <VBtn variant="text" color="primary" @click="prevStep" :disabled="currentStepIndex === 0">
+                Back
+              </VBtn>
+            </template>
+            <template #next>
+              <div class="tw-flex tw-flex-wrap md:tw-flex-row md:tw-items-center tw-gap-3">
+                <template v-if="currentStepIndex < steps.length - 1">
+                  <VBtn color="primary" @click="handleNextStep">
+                    Next
+                  </VBtn>
+                </template>
+                <template v-else>
+                  <div class="tw-flex tw-flex-wrap tw-justify-end tw-gap-2">
+                    <VBtn variant="text" color="secondary" @click="saveDraft" :disabled="submitting">
+                      Save draft
+                    </VBtn>
+                    <VBtn color="primary" :loading="submitting" @click="submitInvoice(true)"
+                      :disabled="submitting || disabledSubmit">
+                      Save &amp; send
+                    </VBtn>
+                  </div>
+                </template>
               </div>
-              <div class="grid gap-3 md:grid-cols-2">
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Amount</label>
-                  <input
-                    v-model.number="initialPayment.amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="input-control"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Method</label>
-                  <select v-model="initialPayment.method" class="input-control">
-                    <option value="bank_transfer">Bank transfer</option>
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="cheque">Cheque</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Reference</label>
-                  <input v-model="initialPayment.reference" type="text" class="input-control" placeholder="Transaction ID" />
-                </div>
-                <div>
-                  <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Payment date</label>
-                  <input v-model="initialPayment.paidAt" type="date" class="input-control" />
-                </div>
-        </div>
-              <div>
-                <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Private notes</label>
-                <textarea v-model="initialPayment.notes" rows="2" class="input-control" placeholder="Internal notes, not visible to the customer" />
-        </div>
-        </div>
-      </div>
-        </section>
+            </template>
+          </VStepperActions>
+        </VStepper>
+      </VForm>
 
-        <section class="card-shell space-y-3 text-sm text-gray-600">
-          <div class="flex items-center justify-between">
-            <span>Subtotal</span>
-            <span class="font-medium text-gray-900">{{ formatCurrency(subtotal, form.currency) }}</span>
-          </div>
-          <div class="flex items-center justify-between" v-if="form.discountAmount > 0">
-            <span>Discount</span>
-            <span class="font-medium text-emerald-600">-{{ formatCurrency(form.discountAmount, form.currency) }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span>Tax ({{ form.taxRate }}%)</span>
-            <span class="font-medium text-gray-900">{{ formatCurrency(taxAmount, form.currency) }}</span>
-          </div>
-          <div class="flex items-center justify-between text-lg font-semibold text-gray-900 border-t border-dashed border-gray-200 pt-4 mt-4">
-            <span>Total due</span>
-            <span>{{ formatCurrency(total, form.currency) }}</span>
-          </div>
-        </section>
-
-        <div class="flex justify-end gap-3">
-          <NuxtLink to="/invoices" class="btn btn-ghost">Cancel</NuxtLink>
-        <button
-            type="button"
-            class="btn btn-primary"
-            :disabled="disabledSubmit || submitting"
-            @click="submitInvoice(false)"
-          >
-            <span v-if="submitting">Saving...</span>
-            <span v-else>Save invoice</span>
-        </button>
-      </div>
-    </form>
-
-      <aside v-if="showPreview" class="space-y-6">
-        <div class="card-shell overflow-hidden p-0">
+      <aside v-if="showPreview" class="tw-w-full">
+        <div class="tw-overflow-hidden tw-h-full">
           <iframe
             title="Invoice Preview"
-            class="w-full h-[900px]"
-            :srcdoc="previewHtml"
+            class="tw-w-full tw-h-[960px]"
+            :src="previewPdfUrl || 'about:blank'"
             style="background:#ffffff; display:block; border:0;"
           />
         </div>
       </aside>
-      </div>
-
-    <div
-      v-if="showProductSelector"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
-      @click.self="showProductSelector = false"
-    >
-      <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900">Import from CCV Shop</h3>
-            <p class="text-sm text-gray-500">Select products to convert directly into invoice line items.</p>
-          </div>
-          <button type="button" class="btn btn-ghost" @click="showProductSelector = false">
-            Close
-          </button>
-        </div>
-        <div class="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
-          <div v-if="loadingProducts" class="text-center text-sm text-gray-500 py-10">
-            Loading products...
-          </div>
-          <div v-else-if="products.length === 0" class="text-center text-sm text-gray-500 py-10">
-            No products available.
-          </div>
-          <div v-else class="space-y-3">
-            <div
-              v-for="product in products"
-              :key="product.id"
-              class="flex items-center justify-between border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition"
-            >
-              <div class="flex-1 pr-4">
-                <p class="font-medium text-gray-900">{{ product.name }}</p>
-                <p class="text-sm text-gray-500">{{ formatCurrency(product.price, form.currency) }}</p>
-                <p v-if="product.stock !== undefined" class="text-xs text-gray-400">
-                  Stock: {{ product.stock }}
-                </p>
-              </div>
-              <div class="flex items-center gap-2">
-                <input
-                  v-model.number="productQuantities[product.id]"
-                  type="number"
-                  min="1"
-                  :max="product.stock"
-                  class="input-control w-24"
-                  placeholder="Qty"
-                />
-                <button type="button" class="btn btn-primary" @click="addProduct(product)">
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
+
+  <VDialog v-model="showProductSelector" max-width="900" scrollable>
+    <VCard>
+      <VCardTitle class="tw-flex tw-items-center tw-justify-between tw-gap-4">
+        <div>
+          <h3 class="tw-text-lg tw-font-semibold tw-text-gray-900">Import from CCV Shop</h3>
+          <p class="tw-text-sm tw-text-gray-500">Select products to convert directly into invoice line items.</p>
+        </div>
+        <VBtn variant="text" color="secondary" @click="showProductSelector = false">
+          Close
+        </VBtn>
+      </VCardTitle>
+      <VCardText>
+        <div v-if="loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
+          Loading products...
+        </div>
+        <div v-else-if="products.length === 0" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
+          No products available.
+        </div>
+        <div v-else class="tw-space-y-3">
+          <VSheet v-for="product in products" :key="product.id"
+            class="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border tw-border-gray-100 tw-rounded-2xl tw-px-4 tw-py-3 hover:tw-bg-gray-50 tw-transition">
+            <div class="tw-flex-1 tw-pr-4">
+              <p class="tw-font-medium tw-text-gray-900">{{ product.name }}</p>
+              <p class="tw-text-sm tw-text-gray-500">{{ formatCurrency(product.price, form.currency) }}</p>
+              <p v-if="product.stock !== undefined" class="tw-text-xs tw-text-gray-400">
+                Stock: {{ product.stock }}
+              </p>
+            </div>
+            <div class="tw-flex tw-items-center tw-gap-2">
+              <VTextField v-model.number="productQuantities[product.id]" type="number" min="1" :max="product.stock"
+                label="Qty" variant="outlined" density="comfortable" color="primary" class="tw-w-24" />
+              <VBtn color="primary" variant="tonal" @click="addProduct(product)">
+                Add
+              </VBtn>
+            </div>
+          </VSheet>
+        </div>
+      </VCardText>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch, onBeforeUnmount } from 'vue'
-import { useRouter } from 'nuxt/app'
-import { $fetch } from 'ofetch'
-
 declare function definePageMeta(meta: any): void
 
 definePageMeta({ middleware: 'auth' })
 
 const router = useRouter()
+const $fetch = useRequestFetch()
 const showPreview = ref(true)
 const submitting = ref(false)
 const showProductSelector = ref(false)
@@ -396,13 +392,227 @@ const carpetDefaults = reactive({
   origin: ''
 })
 
-const initialPayment = reactive({
-  amount: null as number | null,
-  method: 'bank_transfer',
-  reference: '',
-  notes: '',
-  paidAt: ''
+const currencyItems = [
+  { title: 'USD ($)', value: 'USD' },
+  { title: 'EUR (€)', value: 'EUR' },
+  { title: 'GBP (£)', value: 'GBP' },
+  { title: 'CAD ($)', value: 'CAD' },
+  { title: 'AED (د.إ)', value: 'AED' }
+]
+
+const discountTypeItems = [
+  { title: 'Fixed amount', value: 'amount' },
+  { title: 'Percentage', value: 'percent' }
+]
+
+type StepDefinition = {
+  id: string
+  label: string
+  hint: string
+}
+
+const steps = ref<StepDefinition[]>([
+  {
+    id: 'invoice-details',
+    label: 'Invoice details',
+    hint: 'Number, currency, memo'
+  },
+  {
+    id: 'bill-to',
+    label: 'Bill to',
+    hint: 'Client information'
+  },
+  {
+    id: 'line-items',
+    label: 'Line items',
+    hint: 'Defaults and products'
+  },
+  {
+    id: 'review',
+    label: 'Review & totals',
+    hint: 'Discounts and summary'
+  }
+])
+
+const currentStep = ref('0')
+const currentStepIndex = computed(() => Number(currentStep.value))
+const debugLog = (...args: any[]) => {
+  console.log('[create-invoice]', ...args)
+}
+
+type LineItemError = {
+  productName: string
+  quantity: string
+  price: string
+}
+
+const fieldErrors = reactive({
+  invoiceNumber: '',
+  customerName: '',
+  customerEmail: '',
+  items: '',
+  lineItems: [] as LineItemError[]
 })
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function getStepSnapshot(index: number) {
+  if (index === 0) {
+    return {
+      invoiceNumber: form.invoiceNumber,
+      currency: form.currency,
+      taxRate: form.taxRate,
+      invoiceDate: form.invoiceDate,
+      dueDate: form.dueDate,
+      terms: form.terms
+    }
+  }
+  if (index === 1) {
+    return {
+      customerName: form.customerName,
+      customerEmail: form.customerEmail,
+      customerAddressLength: form.customerAddress?.length ?? 0
+    }
+  }
+  if (index === 2) {
+    return {
+      lineItemCount: form.items.length,
+      items: form.items.map((item, idx) => ({
+        idx,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price
+      }))
+    }
+  }
+  return {}
+}
+
+function ensureLineItemErrors() {
+  while (fieldErrors.lineItems.length < form.items.length) {
+    fieldErrors.lineItems.push({
+      productName: '',
+      quantity: '',
+      price: ''
+    })
+  }
+  while (fieldErrors.lineItems.length > form.items.length) {
+    fieldErrors.lineItems.pop()
+  }
+}
+
+function validateStep(index: number) {
+  let valid = true
+
+  if (index === 0) {
+    fieldErrors.invoiceNumber = form.invoiceNumber.trim()
+      ? ''
+      : 'Invoice number is required'
+    if (fieldErrors.invoiceNumber) {
+      debugLog('Step validation failed', {
+        step: index,
+        errors: { invoiceNumber: fieldErrors.invoiceNumber }
+      })
+    }
+    valid = !fieldErrors.invoiceNumber
+  } else if (index === 1) {
+    fieldErrors.customerName = form.customerName.trim()
+      ? ''
+      : 'Client name is required'
+
+    if (!form.customerEmail.trim()) {
+      fieldErrors.customerEmail = 'Client email is required'
+    } else if (!emailPattern.test(form.customerEmail.trim())) {
+      fieldErrors.customerEmail = 'Enter a valid email address'
+    } else {
+      fieldErrors.customerEmail = ''
+    }
+
+    if (fieldErrors.customerName || fieldErrors.customerEmail) {
+      debugLog('Step validation failed', {
+        step: index,
+        errors: {
+          customerName: fieldErrors.customerName,
+          customerEmail: fieldErrors.customerEmail
+        }
+      })
+    }
+
+    valid = !fieldErrors.customerName && !fieldErrors.customerEmail
+  } else if (index === 2) {
+    ensureLineItemErrors()
+
+    if (form.items.length === 0) {
+      fieldErrors.items = 'Add at least one line item before continuing.'
+      return false
+    }
+
+    fieldErrors.items = ''
+
+    form.items.forEach((item, idx) => {
+      const errors = fieldErrors.lineItems[idx]
+      if (!errors) {
+        return
+      }
+      const productName = (item.productName || '').trim()
+      const quantity = Number(item.quantity)
+      const price = Number(item.price)
+
+      errors.productName = productName ? '' : 'Item name is required'
+      errors.quantity = quantity > 0 ? '' : 'Quantity must be greater than zero'
+      errors.price = price > 0 ? '' : 'Unit price must be greater than zero'
+
+      if (errors.productName || errors.quantity || errors.price) {
+        debugLog('Line item validation failed', {
+          step: index,
+          itemIndex: idx,
+          productName,
+          quantity,
+          price,
+          errors: { ...errors }
+        })
+        valid = false
+      }
+    })
+  }
+
+  return valid
+}
+
+function handleNextStep() {
+  console.log('handleNextStep')
+  const index = currentStepIndex.value
+  debugLog('Next button clicked', {
+    step: index,
+    snapshot: getStepSnapshot(index),
+    form: {
+      invoiceNumber: form.invoiceNumber,
+      customerName: form.customerName,
+      customerEmail: form.customerEmail,
+      itemCount: form.items.length
+    }
+  })
+  console.log('[create-invoice] raw step', currentStep.value, currentStepIndex.value)
+  if (!validateStep(index)) {
+    debugLog('Blocked advancing step', { step: index, errors: { ...fieldErrors } })
+    return
+  }
+  debugLog('Advancing to next step', { from: index, to: index + 1 })
+  nextStep()
+}
+
+function nextStep() {
+  console.log('nextStep')
+  const index = currentStepIndex.value
+  if (index >= steps.value.length - 1) return
+  currentStep.value = String(index + 1)
+}
+
+function prevStep() {
+  const index = currentStepIndex.value
+  if (index === 0) return
+  currentStep.value = String(index - 1)
+}
 
 interface InvoiceItem {
   productId?: string
@@ -413,16 +623,23 @@ interface InvoiceItem {
   sizeLabel?: string
   length?: number | null
   width?: number | null
+  area?: number | null
   origin?: string
 }
 
 const products = ref<any[]>([])
 const productQuantities = reactive<Record<string, number>>({})
 
-onMounted(loadProducts)
+let productsLoaded = false
+
+onMounted(() => {
+  if (!productsLoaded) {
+    loadProducts(true)
+  }
+})
 
 const subtotal = computed(() =>
-  form.items.reduce((sum, item) => sum + lineTotal(item), 0)
+  form.items.reduce((sum: number, item: InvoiceItem) => sum + lineTotal(item), 0)
 )
 
 const taxBase = computed(() => Math.max(subtotal.value - (form.discountAmount || 0), 0))
@@ -446,7 +663,7 @@ watch(
 
 watch(
   () => form.invoiceDate,
-  (value) => {
+  (value: string) => {
     if (!form.dueDate && value) {
       const d = new Date(value)
       d.setDate(d.getDate() + 30)
@@ -455,13 +672,100 @@ watch(
   }
 )
 
-async function loadProducts() {
+watch(
+  () => form.invoiceNumber,
+  (value: string) => {
+    if (fieldErrors.invoiceNumber && value?.trim()) {
+      fieldErrors.invoiceNumber = ''
+    }
+  }
+)
+
+watch(
+  () => form.customerName,
+  (value: string) => {
+    if (fieldErrors.customerName && value?.trim()) {
+      fieldErrors.customerName = ''
+    }
+  }
+)
+
+watch(
+  () => form.customerEmail,
+  (value: string) => {
+    if (!fieldErrors.customerEmail || !value?.trim()) return
+    if (emailPattern.test(value.trim())) {
+      fieldErrors.customerEmail = ''
+    }
+  }
+)
+
+watch(
+  () => form.items.length,
+  () => {
+    ensureLineItemErrors()
+    if (form.items.length > 0 && fieldErrors.items) {
+      fieldErrors.items = ''
+    }
+  }
+)
+
+watch(
+  () =>
+    form.items.map((item) => [item.length, item.width]),
+  () => {
+    form.items.forEach((item) => {
+      const area = calculateArea(item)
+      if (area !== item.area) {
+        item.area = area
+      }
+    })
+  },
+  { deep: true }
+)
+
+watch(
+  () =>
+    form.items.map((item) => ({
+      productName: item.productName,
+      quantity: item.quantity,
+      price: item.price
+    })),
+  (
+    items: Array<{
+      productName: string
+      quantity: number | string
+      price: number | string
+    }>
+  ) => {
+    items.forEach((item, idx) => {
+      const errors = fieldErrors.lineItems[idx]
+      if (!errors) return
+      if (errors.productName && (item.productName || '').trim()) {
+        errors.productName = ''
+      }
+      if (errors.quantity && Number(item.quantity) > 0) {
+        errors.quantity = ''
+      }
+      if (errors.price && Number(item.price) > 0) {
+        errors.price = ''
+      }
+    })
+  },
+  { deep: true }
+)
+
+async function loadProducts(initial = false) {
   loadingProducts.value = true
+  debugLog(`Loading CCV products${initial ? ' (initial)' : ''}`)
   try {
     const response = await $fetch('/api/ccv/products')
     products.value = response?.products || []
+    productsLoaded = true
+    debugLog('Loaded CCV products', { total: products.value.length })
   } catch (error) {
     console.error('Error loading products:', error)
+    debugLog('Error loading CCV products', error)
   } finally {
     loadingProducts.value = false
   }
@@ -473,13 +777,17 @@ function addProduct(product: any) {
     alert('Quantity exceeds available stock')
     return
   }
-  
+
   form.items.push({
     productId: product.id,
     productName: product.name,
     description: product.description || '',
     quantity,
     price: product.price,
+    area: calculateArea({
+      length: carpetDefaults.length ?? null,
+      width: carpetDefaults.width ?? null
+    }),
     sizeLabel: carpetDefaults.sizeLabel || undefined,
     length: carpetDefaults.length ?? undefined,
     width: carpetDefaults.width ?? undefined,
@@ -488,6 +796,15 @@ function addProduct(product: any) {
 
   productQuantities[product.id] = 1
   showProductSelector.value = false
+  ensureLineItemErrors()
+  if (fieldErrors.items) {
+    fieldErrors.items = ''
+  }
+  debugLog('Added product from CCV', {
+    id: product.id,
+    name: product.name,
+    items: form.items.length
+  })
 }
 
 function addEmptyItem() {
@@ -496,19 +813,57 @@ function addEmptyItem() {
     description: '',
     quantity: 1,
     price: 0,
+    area: calculateArea({
+      length: carpetDefaults.length ?? null,
+      width: carpetDefaults.width ?? null
+    }),
     sizeLabel: carpetDefaults.sizeLabel || undefined,
     length: carpetDefaults.length ?? undefined,
     width: carpetDefaults.width ?? undefined,
     origin: carpetDefaults.origin || undefined
   })
+  ensureLineItemErrors()
+  if (fieldErrors.items) {
+    fieldErrors.items = ''
+  }
+  debugLog('Added empty line item', { totalItems: form.items.length })
 }
 
 function removeItem(index: number) {
+  debugLog('Removing line item', { index, item: form.items[index] })
   form.items.splice(index, 1)
+  fieldErrors.lineItems.splice(index, 1)
+  if (form.items.length === 0) {
+    fieldErrors.items = ''
+  }
+}
+
+function calculateArea(item: Pick<InvoiceItem, 'length' | 'width'>) {
+  const length = Number(item.length) || 0
+  const width = Number(item.width) || 0
+  const area = length * width
+  return area > 0 ? parseFloat(area.toFixed(2)) : null
 }
 
 function lineTotal(item: InvoiceItem) {
-  return (Number(item.price) || 0) * (Number(item.quantity) || 0)
+  const area = Number(item.area)
+  const price = Number(item.price) || 0
+  if (area && area > 0) {
+    return area * price
+  }
+  return price * (Number(item.quantity) || 0)
+}
+
+function formatArea(item: InvoiceItem) {
+  const area = Number(item.area)
+  if (!area || area <= 0) {
+    return '—'
+  }
+  return `${area.toFixed(2)}`
+}
+
+function recalculateItemTotals(item: InvoiceItem) {
+  item.area = calculateArea(item)
 }
 
 function formatCurrency(value: number, currency = 'USD') {
@@ -529,9 +884,10 @@ function formatDate(value?: string | Date, options?: { raw?: boolean }) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const previewHtml = ref('')
+const previewPdfUrl = ref('')
 const previewUpdating = ref(false)
 let previewTimeout: ReturnType<typeof setTimeout> | null = null
+let previewObjectUrl: string | null = null
 
 const previewPayload = computed(() => ({
   invoiceNumber: form.invoiceNumber || 'INV-XXXXXX',
@@ -543,21 +899,14 @@ const previewPayload = computed(() => ({
   currency: form.currency,
   subtotal: subtotal.value,
   tax: taxAmount.value,
+  taxRate: form.taxRate,
   total: total.value,
+  discount: form.discount,
+  discountType: form.discountType,
+  discountAmount: form.discountAmount,
   memo: form.memo,
   terms: form.terms,
-  payments: initialPayment.amount
-    ? [
-        {
-          amount: initialPayment.amount,
-          method: initialPayment.method,
-          reference: initialPayment.reference,
-          notes: initialPayment.notes,
-          paidAt: initialPayment.paidAt
-        }
-      ]
-    : [],
-  items: form.items.map((item) => ({
+  items: form.items.map((item: InvoiceItem) => ({
     productId: item.productId,
     productName: item.productName,
     description: item.description,
@@ -567,6 +916,7 @@ const previewPayload = computed(() => ({
     sizeLabel: item.sizeLabel,
     length: item.length,
     width: item.width,
+    area: item.area,
     origin: item.origin
   }))
 }))
@@ -586,18 +936,32 @@ onBeforeUnmount(() => {
   if (previewTimeout) {
     clearTimeout(previewTimeout)
   }
+  if (previewObjectUrl) {
+    URL.revokeObjectURL(previewObjectUrl)
+    previewObjectUrl = null
+  }
 })
 
 async function updatePreviewHtml() {
   previewUpdating.value = true
   try {
-    const html = await $fetch<string>('/api/invoices/temp-preview', {
+    const buffer = await $fetch<ArrayBuffer>('/api/invoices/temp-preview', {
       method: 'POST',
-      body: { invoice: previewPayload.value }
+      body: { invoice: previewPayload.value },
+      responseType: 'arrayBuffer'
     })
-    previewHtml.value = html
+    if (previewObjectUrl) {
+      URL.revokeObjectURL(previewObjectUrl)
+    }
+    previewObjectUrl = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }))
+    previewPdfUrl.value = previewObjectUrl
   } catch (error) {
-    previewHtml.value = buildPreviewHtml(previewPayload.value)
+    const fallbackHtml = buildPreviewHtml(previewPayload.value)
+    if (previewObjectUrl) {
+      URL.revokeObjectURL(previewObjectUrl)
+    }
+    previewObjectUrl = URL.createObjectURL(new Blob([fallbackHtml], { type: 'text/html' }))
+    previewPdfUrl.value = previewObjectUrl
   } finally {
     previewUpdating.value = false
   }
@@ -687,8 +1051,8 @@ function buildPreviewHtml(payload: {
           </thead>
           <tbody>
             ${payload.items
-              .map(
-                (item) => `
+      .map(
+        (item) => `
             <tr>
               <td>
                 <div style="font-weight:600;color:#0f172a;">${item.productName}</div>
@@ -700,8 +1064,8 @@ function buildPreviewHtml(payload: {
               <td>${formatCurrency(item.total)}</td>
             </tr>
           `
-              )
-              .join('')}
+      )
+      .join('')}
           </tbody>
         </table>
 
@@ -737,6 +1101,27 @@ function buildPreviewHtml(payload: {
 
 async function submitInvoice(sendEmail: boolean) {
   if (disabledSubmit.value) return
+
+  for (const stepIndex of [0, 1, 2]) {
+    if (!validateStep(stepIndex)) {
+      debugLog('Submission blocked - validation failed', {
+        step: stepIndex,
+        errors: { ...fieldErrors }
+      })
+      currentStep.value = String(stepIndex)
+      return
+    }
+  }
+
+  debugLog('Submitting invoice', {
+    sendEmail,
+    items: form.items.length,
+    totals: {
+      subtotal: subtotal.value,
+      tax: taxAmount.value,
+      total: total.value
+    }
+  })
   submitting.value = true
   try {
     const response = await $fetch('/api/invoices', {
@@ -745,7 +1130,7 @@ async function submitInvoice(sendEmail: boolean) {
         invoiceNumber: form.invoiceNumber,
         customerName: form.customerName,
         customerEmail: form.customerEmail,
-        items: form.items.map((item) => ({
+        items: form.items.map((item: InvoiceItem) => ({
           productId: item.productId,
           productName: item.productName,
           description: item.description,
@@ -755,23 +1140,18 @@ async function submitInvoice(sendEmail: boolean) {
           sizeLabel: item.sizeLabel,
           length: item.length,
           width: item.width,
+          area: item.area,
           origin: item.origin
         })),
         tax: form.taxRate,
+        discount: form.discount,
+        discountType: form.discountType,
+        discountAmount: form.discountAmount,
         currency: form.currency,
         invoiceDate: form.invoiceDate,
         dueDate: form.dueDate,
         terms: form.terms,
-        memo: form.memo,
-        initialPayment: initialPayment.amount
-          ? {
-              amount: initialPayment.amount,
-              method: initialPayment.method,
-              reference: initialPayment.reference || undefined,
-              notes: initialPayment.notes || undefined,
-              paidAt: initialPayment.paidAt || undefined
-            }
-          : undefined
+        memo: form.memo
       }
     })
 
@@ -785,10 +1165,11 @@ async function submitInvoice(sendEmail: boolean) {
         }
       })
     }
-    
+
     await router.push(`/invoices/${response.invoice._id}`)
   } catch (error: any) {
     alert(error?.data?.message || 'Failed to create invoice')
+    debugLog('Submit invoice failed', error)
   } finally {
     submitting.value = false
   }
@@ -828,18 +1209,12 @@ function prefillDemo() {
 }
 
 function resetCarpetDefaults() {
+  debugLog('Resetting carpet defaults', { before: { ...carpetDefaults } })
   carpetDefaults.sizeLabel = ''
   carpetDefaults.length = null
   carpetDefaults.width = null
   carpetDefaults.origin = ''
-}
-
-const paymentLabels: Record<string, string> = {
-  bank_transfer: 'Bank Transfer',
-  cash: 'Cash',
-  card: 'Card',
-  cheque: 'Cheque',
-  other: 'Other'
+  debugLog('Carpet defaults reset', { after: { ...carpetDefaults } })
 }
 
 </script>

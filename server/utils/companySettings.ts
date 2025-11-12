@@ -11,6 +11,7 @@ export interface CompanySettings {
   email?: string
   website?: string
   bankDetails?: string
+  taxId?: string
   footerNote?: string
   updatedAt: Date
   updatedBy?: string

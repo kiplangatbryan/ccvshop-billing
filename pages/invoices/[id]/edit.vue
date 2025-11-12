@@ -1,25 +1,25 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Edit Invoice</h1>
-      <p class="mt-2 text-gray-600">Update invoice details, carpet specifications, and line items.</p>
+  <div class="tw-max-w-4xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-py-8">
+    <div class="tw-mb-8">
+      <h1 class="tw-text-3xl tw-font-bold tw-text-gray-900">Edit Invoice</h1>
+      <p class="tw-mt-2 tw-text-gray-600">Update invoice details, carpet specifications, and line items.</p>
     </div>
 
-    <div v-if="loading" class="bg-white shadow rounded-lg p-6 text-center">
-      <p class="text-gray-500">Loading invoice...</p>
+    <div v-if="loading" class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6 tw-text-center">
+      <p class="tw-text-gray-500">Loading invoice...</p>
     </div>
 
     <form
       v-else
       @submit.prevent="handleSubmit"
-      class="bg-white shadow rounded-lg p-6 space-y-6"
+      class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6 tw-space-y-6"
     >
       <!-- Customer Information -->
       <section>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Customer Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900 tw-mb-4">Customer Information</h2>
+        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
           <div>
-            <label for="invoiceNumber" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="invoiceNumber" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
               Invoice Number *
             </label>
             <input
@@ -27,17 +27,17 @@
               v-model="form.invoiceNumber"
               type="text"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
             />
           </div>
           <div>
-            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="status" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
               Status
             </label>
             <select
               id="status"
               v-model="form.status"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
             >
               <option value="draft">Draft</option>
               <option value="sent">Sent</option>
@@ -47,7 +47,7 @@
             </select>
           </div>
           <div>
-            <label for="customerName" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="customerName" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
               Customer Name *
             </label>
             <input
@@ -55,11 +55,11 @@
               v-model="form.customerName"
               type="text"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
             />
           </div>
           <div>
-            <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="customerEmail" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
               Customer Email *
             </label>
             <input
@@ -67,11 +67,11 @@
               v-model="form.customerEmail"
               type="email"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
             />
           </div>
           <div>
-            <label for="tax" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="tax" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
               Tax Rate (%)
             </label>
             <input
@@ -81,7 +81,7 @@
               min="0"
               max="100"
               step="0.1"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
             />
           </div>
         </div>
@@ -89,161 +89,165 @@
 
       <!-- Line Items -->
       <section>
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Carpet Line Items</h2>
+        <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
+          <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Carpet Line Items</h2>
           <button
             type="button"
             @click="addEmptyItem"
-            class="text-sm text-orange-600 hover:text-orange-500 font-medium"
+            class="tw-text-sm tw-text-orange-600 hover:tw-text-orange-500 tw-font-medium"
           >
             + Add Custom Item
           </button>
         </div>
 
-        <div v-if="form.items.length === 0" class="border-2 border-dashed border-gray-300 rounded-lg py-10 text-center">
-          <p class="text-gray-500 mb-2">No items on this invoice yet.</p>
+        <div
+          v-if="form.items.length === 0"
+          class="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-py-10 tw-text-center"
+        >
+          <p class="tw-text-gray-500 tw-mb-2">No items on this invoice yet.</p>
           <button
             type="button"
             @click="addEmptyItem"
-            class="text-orange-600 hover:text-orange-500 font-medium"
+            class="tw-text-orange-600 hover:tw-text-orange-500 tw-font-medium"
           >
             Add your first item →
           </button>
         </div>
 
-        <div v-else class="space-y-4">
+        <div v-else class="tw-space-y-4">
           <div
             v-for="(item, index) in form.items"
             :key="index"
-            class="border border-gray-200 rounded-lg p-4 space-y-4"
+            class="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-space-y-4"
           >
-            <div class="flex justify-between items-start">
-              <div class="flex-1 pr-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+            <div class="tw-flex tw-justify-between tw-items-start">
+              <div class="tw-flex-1 tw-pr-4">
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Product Name *</label>
                 <input
                   v-model="item.productName"
                   type="text"
                   required
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
               <button
                 type="button"
-                class="text-red-600 hover:text-red-500 text-sm font-medium"
+                class="tw-text-red-600 hover:tw-text-red-500 tw-text-sm tw-font-medium"
                 @click="removeItem(index)"
               >
                 Remove
               </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Quantity *</label>
                 <input
                   v-model.number="item.quantity"
                   type="number"
                   min="1"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Price *</label>
                 <input
                   v-model.number="item.price"
                   type="number"
                   min="0"
                   step="0.01"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Size Label</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Size Label</label>
                 <input
                   v-model="item.sizeLabel"
                   type="text"
                   placeholder="e.g. 8x10"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Length (m)</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Length (m)</label>
                 <input
                   v-model.number="item.length"
                   type="number"
                   min="0"
                   step="0.01"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Width (m)</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Width (m)</label>
                 <input
                   v-model.number="item.width"
                   type="number"
                   min="0"
                   step="0.01"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Origin</label>
+                <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Origin</label>
                 <input
                   v-model="item.origin"
                   type="text"
                   placeholder="e.g. Persian"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
                 />
               </div>
             </div>
 
-            <div class="text-right text-sm text-gray-600">
-              Line Total: <span class="font-semibold text-gray-900">${{ (item.price * item.quantity).toFixed(2) }}</span>
+            <div class="tw-text-right tw-text-sm tw-text-gray-600">
+              Line Total:
+              <span class="tw-font-semibold tw-text-gray-900">{{ (item.price * item.quantity).toFixed(2) }}</span>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Totals -->
-      <section class="border-t pt-4 space-y-2">
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Subtotal:</span>
-          <span class="text-gray-900">${{ subtotal.toFixed(2) }}</span>
+      <section class="tw-border-t tw-pt-4 tw-space-y-2">
+        <div class="tw-flex tw-justify-between tw-text-sm">
+          <span class="tw-text-gray-600">Subtotal:</span>
+          <span class="tw-text-gray-900">{{ subtotal.toFixed(2) }}</span>
         </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Tax ({{ form.tax }}%):</span>
-          <span class="text-gray-900">${{ taxAmount.toFixed(2) }}</span>
+        <div class="tw-flex tw-justify-between tw-text-sm">
+          <span class="tw-text-gray-600">Tax ({{ form.tax }}%):</span>
+          <span class="tw-text-gray-900">{{ taxAmount.toFixed(2) }}</span>
         </div>
-        <div class="flex justify-between text-lg font-semibold border-t pt-2 mt-2">
+        <div class="tw-flex tw-justify-between tw-text-lg tw-font-semibold tw-border-t tw-pt-2 tw-mt-2">
           <span>Total:</span>
-          <span>${{ total.toFixed(2) }}</span>
+          <span>{{ total.toFixed(2) }}</span>
         </div>
       </section>
 
       <!-- Actions -->
-      <div class="flex justify-between items-center pt-4 border-t">
+      <div class="tw-flex tw-justify-between tw-items-center tw-pt-4 tw-border-t">
         <NuxtLink
           :to="`/invoices/${route.params.id}`"
-          class="text-sm text-gray-500 hover:text-gray-700"
+          class="tw-text-sm tw-text-gray-500 hover:tw-text-gray-700"
         >
           ← Back to invoice
         </NuxtLink>
 
-        <div class="flex space-x-4">
+        <div class="tw-flex tw-space-x-4">
           <NuxtLink
             to="/invoices"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            class="tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-gray-700 hover:tw-bg-gray-50"
           >
             Cancel
           </NuxtLink>
           <button
             type="submit"
             :disabled="saving || form.items.length === 0"
-            class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="tw-px-6 tw-py-2 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
           >
             <span v-if="saving">Saving...</span>
             <span v-else>Save Changes</span>
@@ -256,12 +260,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter, useNuxtApp } from 'nuxt/app'
+import { useRoute, useRouter } from 'nuxt/app'
 
 declare function definePageMeta(meta: any): void
 
-const nuxtApp = useNuxtApp()
-const $fetch = nuxtApp.$fetch as any
+const $fetch = useRequestFetch()
 
 definePageMeta({
   middleware: 'auth'
@@ -297,7 +300,7 @@ onMounted(async () => {
 const loadInvoice = async () => {
   loading.value = true
   try {
-    const invoice = await $fetch(`/api/invoices/${route.params.id}`)
+    const invoice = await $fetch<any>(`/api/invoices/${route.params.id}`)
     form.value.invoiceNumber = invoice.invoiceNumber
     form.value.customerName = invoice.customerName
     form.value.customerEmail = invoice.customerEmail

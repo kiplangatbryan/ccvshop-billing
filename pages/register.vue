@@ -54,10 +54,24 @@
                 placeholder="Create a strong password"
               />
               <button type="button" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-                <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  v-if="showPassword"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="tw-w-5 tw-h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3l18 18M10.477 10.478A3 3 0 0113.5 13.5m-1.5 4.5a9.77 9.77 0 01-4.2-.94m-3.4-2.69A9.876 9.876 0 012.25 12c1.2-3.5 4.8-6 9.75-6 1.31 0 2.56.19 3.72.54M21.75 12a9.876 9.876 0 01-2.25 3.37m-3.03 2.26A9.77 9.77 0 0112 18" />
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="tw-w-5 tw-h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <circle cx="12" cy="12" r="3" stroke-width="1.5" />
                   <path stroke-linecap="round" stroke-width="1.5" d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" />
                 </svg>
@@ -67,7 +81,7 @@
 
           <div v-if="error" class="auth-error">{{ error }}</div>
 
-          <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+          <button type="submit" class="btn btn-primary tw-w-full" :disabled="loading">
             <span v-if="loading">Creating account…</span>
             <span v-else>Sign up</span>
           </button>

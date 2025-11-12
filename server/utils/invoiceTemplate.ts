@@ -8,6 +8,7 @@ export interface CompanyInfo {
   logoUrl?: string
   website?: string
   bankDetails?: string
+  taxId?: string
   footerNote?: string
 }
 

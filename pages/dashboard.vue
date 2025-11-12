@@ -1,32 +1,39 @@
 <template>
-  <div class="page-shell space-y-8">
+  <div class="page-shell tw-space-y-8">
     <header class="page-header">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#22c55e]">Overview</p>
+        <p class="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[#22c55e]">Overview</p>
         <h1>Accounting Dashboard</h1>
-        <p class="text-gray-500 mt-2">Monitor revenue, invoice health, and customer activity at a glance.</p>
+        <p class="tw-text-gray-500 tw-mt-2">
+          Monitor revenue, invoice health, and customer activity at a glance.
+        </p>
       </div>
     </header>
 
     <div class="card-shell controls-bar">
       <div class="controls-grid">
-        <div class="relative flex-1 min-w-[200px]">
-          <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <div class="tw-relative tw-flex-1 tw-min-w-[200px]">
+          <svg
+            class="tw-absolute tw-left-3 tw-top-2.5 tw-w-4 tw-h-4 tw-text-gray-400"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            fill="none"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
           </svg>
           <input
             v-model="filters.search"
             type="search"
             placeholder="Search clients or invoices"
-            class="search-input pl-9"
+            class="search-input tw-pl-9"
           />
         </div>
-        <select v-model="filters.range" class="filter-select w-40 min-w-[160px]">
+        <select v-model="filters.range" class="filter-select tw-w-40 tw-min-w-[160px]">
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
           <option value="90">Last quarter</option>
         </select>
-        <select v-model="filters.status" class="filter-select w-40 min-w-[160px]">
+        <select v-model="filters.status" class="filter-select tw-w-40 tw-min-w-[160px]">
           <option value="all">All statuses</option>
           <option value="paid">Paid</option>
           <option value="sent">Sent</option>
@@ -35,14 +42,14 @@
         </select>
       </div>
       <button class="btn btn-ghost export-btn">
-        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7H3v7a2 2 0 002 2z" />
         </svg>
         Export data
       </button>
     </div>
 
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section class="tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-4">
       <DashboardStat
         title="Monthly Recurring Revenue"
         :value="formatCurrency(metrics.mrr)"
@@ -73,19 +80,19 @@
       />
     </section>
 
-    <section class="card-shell space-y-6">
-      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+    <section class="card-shell tw-space-y-6">
+      <div class="tw-flex tw-flex-col xl:tw-flex-row xl:tw-items-center xl:tw-justify-between tw-gap-4">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Total Revenue</h2>
-          <p class="text-xs uppercase tracking-wide text-gray-400">This period vs last period</p>
+          <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Total Revenue</h2>
+          <p class="tw-text-xs tw-uppercase tw-tracking-wide tw-text-gray-400">This period vs last period</p>
         </div>
-        <div class="flex items-center gap-3 text-xs text-gray-500">
+        <div class="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-gray-500">
           <span class="legend legend-current"></span> This week
           <span class="legend legend-previous"></span> Last week
         </div>
       </div>
       <div>
-        <svg viewBox="0 0 620 220" class="w-full">
+        <svg viewBox="0 0 620 220" class="tw-w-full">
           <defs>
             <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#705cff" stop-opacity="0.28" />
@@ -103,27 +110,35 @@
     </section>
 
     <section class="table-panel">
-      <div class="px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-gray-100">
+      <div
+        class="tw-px-6 tw-py-4 tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-3 tw-border-b tw-border-gray-100"
+      >
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Content Performance</h2>
-          <p class="text-sm text-gray-500">Snapshot of invoice activity within the selected range.</p>
+          <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Content Performance</h2>
+          <p class="tw-text-sm tw-text-gray-500">Snapshot of invoice activity within the selected range.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <div class="tw-flex tw-items-center tw-gap-3">
+          <div class="tw-relative">
+            <svg
+              class="tw-absolute tw-left-3 tw-top-2.5 tw-w-4 tw-h-4 tw-text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              fill="none"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
             </svg>
-            <input type="search" placeholder="Search invoices" class="search-input pl-9 w-60" />
+            <input type="search" placeholder="Search invoices" class="search-input tw-pl-9 tw-w-60" />
           </div>
           <button class="btn btn-ghost">
-            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v3H3V4zM3 9h18v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" />
             </svg>
             Filter
           </button>
         </div>
       </div>
-      <div class="overflow-x-auto">
+      <div class="tw-overflow-x-auto">
         <table class="table">
           <thead>
             <tr>
@@ -131,24 +146,26 @@
               <th>Client</th>
               <th>Issued date</th>
               <th>Status</th>
-              <th class="text-right">Revenue</th>
+              <th class="tw-text-right">Revenue</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="invoice in tableRows" :key="invoice._id">
               <td>
-                <div class="font-semibold text-gray-900">{{ invoice.invoiceNumber }}</div>
-                <div class="text-xs text-gray-400">{{ invoice.items.length }} items</div>
+                <div class="tw-font-semibold tw-text-gray-900">{{ invoice.invoiceNumber }}</div>
+                <div class="tw-text-xs tw-text-gray-400">{{ invoice.items.length }} items</div>
               </td>
               <td>
-                <div class="font-medium text-gray-900">{{ invoice.customerName }}</div>
-                <div class="text-xs text-gray-400">{{ invoice.customerEmail }}</div>
+                <div class="tw-font-medium tw-text-gray-900">{{ invoice.customerName }}</div>
+                <div class="tw-text-xs tw-text-gray-400">{{ invoice.customerEmail }}</div>
               </td>
-              <td class="text-gray-600">{{ formatDate(invoice.invoiceDate || invoice.createdAt) }}</td>
+              <td class="tw-text-gray-600">{{ formatDate(invoice.invoiceDate || invoice.createdAt) }}</td>
               <td>
                 <span :class="['chip', statusColor(invoice.status)]">{{ invoice.status }}</span>
               </td>
-              <td class="text-right font-semibold text-gray-900">{{ formatCurrency(invoice.total, invoice.currency) }}</td>
+              <td class="tw-text-right tw-font-semibold tw-text-gray-900">
+                {{ formatCurrency(invoice.total, invoice.currency) }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -159,7 +176,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { $fetch } from 'ofetch'
 
 declare function definePageMeta(meta: any): void
 
@@ -195,9 +211,11 @@ const metrics = reactive({
   completion: 0
 })
 
+const $fetch = useRequestFetch()
+
 onMounted(async () => {
   try {
-    const data = await $fetch('/api/invoices')
+    const data = await $fetch<any[]>('/api/invoices')
     invoices.value = data
     computeMetrics()
   } catch (error) {
@@ -319,7 +337,7 @@ function computeMetrics() {
 
 async function downloadPdf(id: string) {
   try {
-    const buffer = await $fetch(`/api/invoices/${id}/pdf`, {
+    const buffer = await $fetch<ArrayBuffer>(`/api/invoices/${id}/pdf`, {
       method: 'GET',
       responseType: 'arrayBuffer'
     })

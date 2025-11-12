@@ -1,27 +1,34 @@
 <template>
-  <div class="page-shell space-y-8">
+  <div class="page-shell tw-space-y-8">
     <header class="page-header">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#22c55e]">Billing</p>
+        <p class="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[#22c55e]">Billing</p>
         <h1>Invoice Workspace</h1>
-        <p class="text-gray-500 mt-2">Track invoice performance, manage payments, and keep clients in the loop.</p>
+        <p class="tw-text-gray-500 tw-mt-2">
+          Track invoice performance, manage payments, and keep clients in the loop.
+        </p>
       </div>
     </header>
 
     <div class="card-shell controls-bar">
       <div class="controls-grid">
-        <div class="relative flex-1 min-w-[220px]">
-          <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <div class="tw-relative tw-flex-1 tw-min-w-[220px]">
+          <svg
+            class="tw-absolute tw-left-3 tw-top-2.5 tw-w-4 tw-h-4 tw-text-gray-400"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            fill="none"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
           </svg>
           <input
             v-model="filters.search"
             type="search"
             placeholder="Search invoices or clients"
-            class="search-input pl-9"
+            class="search-input tw-pl-9"
           />
         </div>
-        <select v-model="filters.status" class="filter-select w-40 min-w-[160px]">
+        <select v-model="filters.status" class="filter-select tw-w-40 tw-min-w-[160px]">
           <option value="all">All statuses</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
@@ -37,59 +44,61 @@
     </div>
 
     <transition name="fade">
-      <div v-if="showAdvanced" class="card-shell grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div v-if="showAdvanced" class="card-shell tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-5">
         <div>
-          <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Date from</label>
+          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Date from</label>
           <input v-model="filters.dateFrom" type="date" class="input-control" />
         </div>
         <div>
-          <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Date to</label>
+          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Date to</label>
           <input v-model="filters.dateTo" type="date" class="input-control" />
         </div>
         <div>
-          <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Min total</label>
+          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Min total</label>
           <input v-model.number="filters.minTotal" type="number" min="0" step="0.01" class="input-control" placeholder="0.00" />
         </div>
         <div>
-          <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Max total</label>
+          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Max total</label>
           <input v-model.number="filters.maxTotal" type="number" min="0" step="0.01" class="input-control" placeholder="Any" />
         </div>
-        <div class="md:col-span-2 xl:col-span-1">
-          <label class="text-xs font-semibold uppercase text-gray-500 block mb-1">Memo contains</label>
+        <div class="md:tw-col-span-2 xl:tw-col-span-1">
+          <label class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500 tw-block tw-mb-1">Memo contains</label>
           <input v-model="filters.memo" type="text" class="input-control" placeholder="Keyword" />
         </div>
-        <div class="md:col-span-2 xl:col-span-5 flex justify-end gap-3">
+        <div class="md:tw-col-span-2 xl:tw-col-span-5 tw-flex tw-justify-end tw-gap-3">
           <button class="btn btn-ghost" type="button" @click="resetFilters">Reset</button>
         </div>
     </div>
     </transition>
 
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section class="tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-4">
       <div
         v-for="card in summaryCards"
         :key="card.label"
-        class="card-shell flex flex-col gap-3"
+        class="card-shell tw-flex tw-flex-col tw-gap-3"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-500">{{ card.label }}</span>
+        <div class="tw-flex tw-items-center tw-justify-between">
+          <span class="tw-text-sm tw-font-medium tw-text-gray-500">{{ card.label }}</span>
           <span :class="['badge-soft', card.trend >= 0 ? 'badge-green' : 'badge-red']">
             {{ card.trend >= 0 ? '+' : '' }}{{ card.trend }}%
           </span>
         </div>
-        <p class="text-2xl font-semibold text-gray-900">{{ card.value }}</p>
-        <p class="text-xs text-gray-400">{{ card.helper }}</p>
+        <p class="tw-text-2xl tw-font-semibold tw-text-gray-900">{{ card.value }}</p>
+        <p class="tw-text-xs tw-text-gray-400">{{ card.helper }}</p>
       </div>
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-[1.55fr,1fr]">
+    <section class="tw-grid tw-gap-6 xl:tw-grid-cols-[1.55fr,1fr]">
       <div class="table-panel">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-4 tw-border-b tw-border-gray-100">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900">Invoices</h2>
-            <p class="text-sm text-gray-500">Showing {{ filteredInvoices.length }} of {{ invoices.length }} invoices</p>
+            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoices</h2>
+            <p class="tw-text-sm tw-text-gray-500">
+              Showing {{ filteredInvoices.length }} of {{ invoices.length }} invoices
+            </p>
           </div>
         </div>
-        <div class="overflow-x-auto">
+        <div class="tw-overflow-x-auto">
           <table class="table">
             <thead>
               <tr>
@@ -98,33 +107,37 @@
                 <th>Issued / Due</th>
                 <th>Amount</th>
                 <th>Status</th>
-                <th class="text-right">Actions</th>
+                <th class="tw-text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="invoice in filteredInvoices"
                 :key="invoice._id"
-                :class="{ 'bg-[rgba(111,99,255,0.05)]': selectedInvoice?._id === invoice._id }"
+                :class="{ 'tw-bg-[rgba(111,99,255,0.05)]': selectedInvoice?._id === invoice._id }"
                 @click="selectInvoice(invoice)"
               >
                 <td>
-                  <div class="font-semibold text-gray-900">{{ invoice.invoiceNumber }}</div>
-                  <div class="text-xs text-gray-400">{{ invoice.items.length }} items · {{ invoice.currency || 'USD' }}</div>
+                  <div class="tw-font-semibold tw-text-gray-900">{{ invoice.invoiceNumber }}</div>
+                  <div class="tw-text-xs tw-text-gray-400">
+                    {{ invoice.items.length }} items · {{ invoice.currency || 'USD' }}
+                  </div>
                 </td>
                 <td>
-                  <div class="font-medium text-gray-900">{{ invoice.customerName }}</div>
-                  <div class="text-xs text-gray-400">{{ invoice.customerEmail }}</div>
+                  <div class="tw-font-medium tw-text-gray-900">{{ invoice.customerName }}</div>
+                  <div class="tw-text-xs tw-text-gray-400">{{ invoice.customerEmail }}</div>
                 </td>
-                <td class="text-gray-600">
+                <td class="tw-text-gray-600">
                   <div>{{ formatDate(invoice.invoiceDate || invoice.createdAt) }}</div>
-                  <div class="text-xs text-gray-400">Due {{ invoice.dueDate ? formatDate(invoice.dueDate) : '—' }}</div>
+                  <div class="tw-text-xs tw-text-gray-400">
+                    Due {{ invoice.dueDate ? formatDate(invoice.dueDate) : '—' }}
+                  </div>
                 </td>
-                <td class="font-semibold text-gray-900">{{ formatCurrency(invoice.total, invoice.currency) }}</td>
+                <td class="tw-font-semibold tw-text-gray-900">{{ formatCurrency(invoice.total, invoice.currency) }}</td>
                 <td>
                   <span :class="['chip', statusColor(invoice.status)]">{{ invoice.status }}</span>
                 </td>
-                <td class="text-right space-x-3">
+                <td class="tw-text-right tw-space-x-3">
                   <NuxtLink :to="`/invoices/${invoice._id}`" class="table-action">View</NuxtLink>
                   <button class="table-action" @click.stop="downloadPdf(invoice._id)">PDF</button>
                 </td>
@@ -134,11 +147,13 @@
         </div>
     </div>
 
-      <div class="card-shell space-y-5">
-            <div class="flex items-center justify-between">
+      <div class="card-shell tw-space-y-5">
+        <div class="tw-flex tw-items-center tw-justify-between">
           <div>
-            <p class="text-xs uppercase tracking-wide text-gray-400">Quick preview</p>
-            <h2 class="text-lg font-semibold text-gray-900">{{ selectedInvoice?.invoiceNumber || 'Select an invoice' }}</h2>
+            <p class="tw-text-xs tw-uppercase tw-tracking-wide tw-text-gray-400">Quick preview</p>
+            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">
+              {{ selectedInvoice?.invoiceNumber || 'Select an invoice' }}
+            </h2>
           </div>
           <NuxtLink
             v-if="selectedInvoice"
@@ -148,53 +163,59 @@
             Open invoice
           </NuxtLink>
         </div>
-        <div v-if="!selectedInvoice" class="text-sm text-gray-500">
+        <div v-if="!selectedInvoice" class="tw-text-sm tw-text-gray-500">
           Choose an invoice from the table to view client details, totals, and status.
         </div>
-        <div v-else class="space-y-4 text-sm">
+        <div v-else class="tw-space-y-4 tw-text-sm">
           <div>
-            <p class="text-xs font-semibold uppercase text-gray-400 mb-1">Client</p>
-            <p class="font-medium text-gray-900">{{ selectedInvoice.customerName }}</p>
-            <p class="text-gray-500">{{ selectedInvoice.customerEmail }}</p>
+            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-1">Client</p>
+            <p class="tw-font-medium tw-text-gray-900">{{ selectedInvoice.customerName }}</p>
+            <p class="tw-text-gray-500">{{ selectedInvoice.customerEmail }}</p>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="tw-grid tw-grid-cols-2 tw-gap-3">
             <div>
-              <p class="text-xs font-semibold uppercase text-gray-400 mb-1">Issued</p>
-              <p class="font-medium text-gray-900">{{ formatDate(selectedInvoice.invoiceDate || selectedInvoice.createdAt) }}</p>
+              <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-1">Issued</p>
+              <p class="tw-font-medium tw-text-gray-900">
+                {{ formatDate(selectedInvoice.invoiceDate || selectedInvoice.createdAt) }}
+              </p>
             </div>
             <div>
-              <p class="text-xs font-semibold uppercase text-gray-400 mb-1">Due date</p>
-              <p class="font-medium text-gray-900">{{ selectedInvoice.dueDate ? formatDate(selectedInvoice.dueDate) : '—' }}</p>
+              <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-1">Due date</p>
+              <p class="tw-font-medium tw-text-gray-900">
+                {{ selectedInvoice.dueDate ? formatDate(selectedInvoice.dueDate) : '—' }}
+              </p>
             </div>
                 </div>
           <div>
-            <p class="text-xs font-semibold uppercase text-gray-400 mb-1">Amounts</p>
-            <p class="text-xl font-semibold text-gray-900">{{ formatCurrency(selectedInvoice.total, selectedInvoice.currency) }}</p>
-            <p class="text-xs text-gray-500">
+            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-1">Amounts</p>
+            <p class="tw-text-xl tw-font-semibold tw-text-gray-900">
+              {{ formatCurrency(selectedInvoice.total, selectedInvoice.currency) }}
+            </p>
+            <p class="tw-text-xs tw-text-gray-500">
               Paid {{ formatCurrency(getPaidAmount(selectedInvoice), selectedInvoice.currency) }} ·
               Outstanding {{ formatCurrency(Math.max(selectedInvoice.total - getPaidAmount(selectedInvoice), 0), selectedInvoice.currency) }}
                 </p>
               </div>
           <div>
-            <p class="text-xs font-semibold uppercase text-gray-400 mb-1">Memo</p>
-            <p class="text-gray-600" v-if="selectedInvoice.memo">{{ selectedInvoice.memo }}</p>
-            <p class="text-gray-400" v-else>No memo recorded.</p>
+            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-1">Memo</p>
+            <p class="tw-text-gray-600" v-if="selectedInvoice.memo">{{ selectedInvoice.memo }}</p>
+            <p class="tw-text-gray-400" v-else>No memo recorded.</p>
                 </div>
           <div>
-            <p class="text-xs font-semibold uppercase text-gray-400 mb-2">Line items</p>
-            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-400 tw-mb-2">Line items</p>
+            <div class="tw-space-y-2 tw-max-h-48 tw-overflow-y-auto tw-pr-1">
               <div
                 v-for="(item, idx) in selectedInvoice.items"
                 :key="idx"
-                class="border border-gray-100 rounded-xl px-3 py-2 flex justify-between text-sm"
+                class="tw-border tw-border-gray-100 tw-rounded-xl tw-px-3 tw-py-2 tw-flex tw-justify-between tw-text-sm"
               >
                 <div>
-                  <p class="font-medium text-gray-900">{{ item.productName }}</p>
-                  <p class="text-xs text-gray-400">
+                  <p class="tw-font-medium tw-text-gray-900">{{ item.productName }}</p>
+                  <p class="tw-text-xs tw-text-gray-400">
                     {{ item.sizeLabel || '—' }} · {{ item.quantity }} × {{ formatCurrency(item.price, selectedInvoice.currency) }}
                   </p>
                 </div>
-                <p class="font-semibold text-gray-900">{{ formatCurrency(item.total, selectedInvoice.currency) }}</p>
+                <p class="tw-font-semibold tw-text-gray-900">{{ formatCurrency(item.total, selectedInvoice.currency) }}</p>
               </div>
             </div>
           </div>
@@ -206,12 +227,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { $fetch } from 'ofetch'
 
 const loading = ref(true)
 const invoices = ref<any[]>([])
 const selectedInvoice = ref<any | null>(null)
 const showAdvanced = ref(false)
+const $fetch = useRequestFetch()
 
 const filters = reactive({
   search: '',
@@ -232,7 +253,7 @@ const summary = reactive({
 
 onMounted(async () => {
   try {
-    const data = await $fetch('/api/invoices')
+    const data = await $fetch<any[]>('/api/invoices')
     invoices.value = data
     computeSummary()
     if (data.length) {
@@ -333,7 +354,7 @@ function selectInvoice(invoice: any) {
 
 async function downloadPdf(id: string) {
   try {
-    const buffer = await $fetch(`/api/invoices/${id}/pdf`, {
+    const buffer = await $fetch<ArrayBuffer>(`/api/invoices/${id}/pdf`, {
       method: 'GET',
       responseType: 'arrayBuffer'
     })

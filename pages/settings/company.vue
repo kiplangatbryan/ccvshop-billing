@@ -1,19 +1,21 @@
 <template>
-  <div class="page-shell space-y-8">
+  <div class="page-shell tw-space-y-8">
     <header class="page-header">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#22c55e]">Organisation</p>
+        <p class="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[#22c55e]">Organisation</p>
         <h1>Company Settings</h1>
-        <p class="text-gray-500 mt-2">Keep your business profile up to date for invoices, emails, and notifications.</p>
+        <p class="tw-text-gray-500 tw-mt-2">
+          Keep your business profile up to date for invoices, emails, and notifications.
+        </p>
       </div>
     </header>
 
-    <div v-if="loading" class="card-shell text-center text-gray-500">
+    <div v-if="loading" class="card-shell tw-text-center tw-text-gray-500">
       Loading settings…
     </div>
 
-    <form v-else @submit.prevent="saveSettings" class="space-y-6">
-      <section class="card-shell space-y-4">
+    <form v-else @submit.prevent="saveSettings" class="tw-space-y-6">
+      <section class="card-shell tw-space-y-4">
         <div class="section-header">
           <h2>Brand identity</h2>
           <p>Show clients who you are on every invoice.</p>
@@ -34,7 +36,7 @@
         </div>
       </section>
 
-      <section class="card-shell space-y-4">
+      <section class="card-shell tw-space-y-4">
         <div class="section-header">
           <h2>Contact details</h2>
           <p>These details appear on invoices and outbound messages.</p>
@@ -59,7 +61,7 @@
         </div>
       </section>
 
-      <section class="card-shell space-y-4">
+      <section class="card-shell tw-space-y-4">
         <div class="section-header">
           <h2>Invoice details</h2>
           <p>Let customers know how to pay you and anything else they should remember.</p>
@@ -88,13 +90,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'nuxt/app'
-import { $fetch } from 'ofetch'
 
 declare function definePageMeta(meta: any): void
 
 definePageMeta({ middleware: 'auth' })
 
 const router = useRouter()
+const $fetch = useRequestFetch()
 
 const loading = ref(true)
 const saving = ref(false)

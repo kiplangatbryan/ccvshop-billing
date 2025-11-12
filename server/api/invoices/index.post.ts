@@ -27,7 +27,10 @@ export default defineEventHandler(async (event) => {
       invoiceDate,
       dueDate,
       terms,
-      memo
+      memo,
+      discount = 0,
+      discountType = 'amount',
+      discountAmount: discountAmountInput
     } = body
 
     if (!invoiceNumber || !customerName || !customerEmail || !items || items.length === 0) {
@@ -37,9 +40,23 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0)
-    const taxAmount = subtotal * (tax / 100)
-    const total = subtotal + taxAmount
+    const lineTotals = items.map((item: any) => Number(item.total ?? item.price * item.quantity) || 0)
+    const subtotal = lineTotals.reduce((sum: number, total) => sum + total, 0)
+
+    let discountAmount = Number(discountAmountInput)
+    if (!(discountAmount >= 0)) {
+      const discountValue = Number(discount) || 0
+      if (discountType === 'percent') {
+        discountAmount = Math.min(subtotal, (subtotal * discountValue) / 100)
+      } else {
+        discountAmount = Math.min(subtotal, discountValue)
+      }
+    }
+
+    discountAmount = Math.max(discountAmount, 0)
+    const taxableBase = Math.max(subtotal - discountAmount, 0)
+    const taxAmount = taxableBase * (tax / 100)
+    const total = taxableBase + taxAmount
 
     const invoiceItems: InvoiceItem[] = items.map((item: any, index: number) => {
       const sizeLabel = item.sizeLabel ?? item.size ?? carpetDefaults?.sizeLabel
@@ -50,9 +67,13 @@ export default defineEventHandler(async (event) => {
       const payload: InvoiceItem = {
         productId: item.productId,
         productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        total: item.price * item.quantity
+        quantity: Number(item.quantity) || 0,
+        price: Number(item.price) || 0,
+        total: Number(item.total ?? item.price * item.quantity) || 0
+      }
+
+      if (item.description) {
+        payload.description = item.description
       }
 
       if (sizeLabel) {
@@ -64,6 +85,18 @@ export default defineEventHandler(async (event) => {
       if (width !== undefined && width !== null) {
         payload.width = Number(width)
       }
+
+      const areaFromPayload =
+        typeof item.area === 'number'
+          ? item.area
+          : payload.length !== undefined && payload.width !== undefined
+              ? Number(payload.length) * Number(payload.width)
+              : undefined
+
+      if (areaFromPayload !== undefined) {
+        payload.area = Number(areaFromPayload)
+      }
+
       if (origin) {
         payload.origin = origin
       }
@@ -98,6 +131,7 @@ export default defineEventHandler(async (event) => {
       subtotal,
       tax: taxAmount,
       total,
+      taxRate: Number(tax) || 0,
       status: payments.length > 0 ? (payments[0].amount >= total ? 'paid' : 'partial') : 'draft',
       payments,
       currency,
@@ -105,6 +139,9 @@ export default defineEventHandler(async (event) => {
       dueDate: dueDate ? new Date(dueDate) : undefined,
       terms: terms || undefined,
       memo: memo || undefined,
+      discountAmount,
+      discountType,
+      discount: Number(discount) || 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: user.userId

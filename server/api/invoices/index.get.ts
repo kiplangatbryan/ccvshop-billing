@@ -18,6 +18,10 @@ export interface Invoice {
   dueDate?: Date
   terms?: string
   memo?: string
+  discountAmount?: number
+  discountType?: 'amount' | 'percent'
+  discount?: number
+  taxRate?: number
   createdAt: Date
   updatedAt: Date
   createdBy: string
@@ -29,9 +33,11 @@ export interface InvoiceItem {
   quantity: number
   price: number
   total: number
+  description?: string
   sizeLabel?: string
   length?: number
   width?: number
+  area?: number
   origin?: string
 }
 
