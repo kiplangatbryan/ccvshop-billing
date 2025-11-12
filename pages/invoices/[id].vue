@@ -5,86 +5,73 @@
     </div>
 
     <div v-else-if="invoice" class="tw-space-y-6">
-      <!-- Header -->
-      <div class="tw-flex tw-justify-between tw-items-start">
+      <div class="tw-flex tw-flex-wrap tw-justify-between tw-items-start tw-gap-4">
         <div>
           <h1 class="tw-text-3xl tw-font-bold tw-text-gray-900">Invoice {{ invoice.invoiceNumber }}</h1>
           <p class="tw-mt-2 tw-text-gray-600">
-            Created: {{ new Date(invoice.createdAt).toLocaleDateString() }}
+            Created: {{ formatDate(invoice.createdAt) }}<span v-if="invoice.dueDate"> · Due: {{ formatDate(invoice.dueDate) }}</span>
           </p>
         </div>
-        <div class="tw-flex tw-space-x-3">
-          <button
-            @click="downloadPDF"
-            class="tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-gray-700 hover:tw-bg-gray-50"
-          >
+        <div class="tw-flex tw-flex-wrap tw-gap-3">
+          <VBtn variant="tonal" color="primary" @click="downloadPDF" prepend-icon="mdi-download">
             Download PDF
-          </button>
-          <button
+          </VBtn>
+          <VBtn
             v-if="invoice.status !== 'paid'"
+            color="success"
             @click="markAsPaid"
+            :loading="processingPayment"
             :disabled="processingPayment"
-            class="tw-px-4 tw-py-2 tw-bg-green-600 tw-text-white tw-rounded-lg hover:tw-bg-green-700 disabled:tw-opacity-50"
           >
-            <span v-if="processingPayment">Processing...</span>
-            <span v-else>Mark as Paid</span>
-          </button>
-          <button
-            @click="openPaymentModal"
-            class="tw-px-4 tw-py-2 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700"
-          >
+            Mark as Paid
+          </VBtn>
+          <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true">
             Record Payment
-          </button>
+          </VBtn>
         </div>
       </div>
 
-      <!-- Invoice Details -->
-      <div class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6">
-        <!-- Status -->
-        <div class="tw-mb-6">
-          <span
-            :class="{
-              'tw-bg-green-100 tw-text-green-800': invoice.status === 'paid',
-              'tw-bg-yellow-100 tw-text-yellow-800': invoice.status === 'sent',
-              'tw-bg-gray-100 tw-text-gray-800': invoice.status === 'draft',
-              'tw-bg-red-100 tw-text-red-800': invoice.status === 'cancelled'
-            }"
-            class="tw-inline-flex tw-px-3 tw-py-1 tw-text-sm tw-font-semibold tw-rounded-full"
+      <VSheet class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6 tw-space-y-6">
+        <div>
+          <VChip
+            size="small"
+            :color="statusColor"
+            variant="flat"
+            class="tw-uppercase tw-font-semibold"
           >
-            {{ invoice.status.toUpperCase() }}
-          </span>
+            {{ invoice.status }}
+          </VChip>
         </div>
 
-        <!-- Customer Info -->
-        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6 tw-mb-6">
-          <div>
-            <h3 class="tw-text-sm tw-font-medium tw-text-gray-500 tw-mb-2">Bill To:</h3>
-            <p class="tw-text-gray-900 tw-font-medium">{{ invoice.customerName }}</p>
-            <p class="tw-text-gray-600">{{ invoice.customerEmail }}</p>
+        <div class="tw-grid md:tw-grid-cols-2 tw-gap-6">
+          <div class="tw-space-y-2">
+            <h3 class="tw-text-sm tw-font-semibold tw-text-gray-500">Bill To</h3>
+            <p class="tw-font-medium tw-text-gray-900">{{ invoice.customerName }}</p>
+            <p class="tw-text-sm tw-text-gray-600">{{ invoice.customerEmail }}</p>
           </div>
-          <div>
-            <h3 class="tw-text-sm tw-font-medium tw-text-gray-500 tw-mb-2">Invoice Details:</h3>
-            <p class="tw-text-gray-900">Invoice #: {{ invoice.invoiceNumber }}</p>
-            <p class="tw-text-gray-600">Date: {{ new Date(invoice.createdAt).toLocaleDateString() }}</p>
+          <div class="tw-space-y-2">
+            <h3 class="tw-text-sm tw-font-semibold tw-text-gray-500">Invoice Details</h3>
+            <div class="tw-text-sm tw-text-gray-700">Invoice #: <span class="tw-font-medium">{{ invoice.invoiceNumber }}</span></div>
+            <div class="tw-text-sm tw-text-gray-700">Date: <span class="tw-font-medium">{{ formatDate(invoice.createdAt) }}</span></div>
+            <div class="tw-text-sm tw-text-gray-700">Due Date: <span class="tw-font-medium">{{ formatDate(invoice.dueDate) }}</span></div>
           </div>
         </div>
 
-        <!-- Items Table -->
         <div class="tw-border-t tw-border-gray-200 tw-pt-6">
           <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
             <thead class="tw-bg-gray-50">
               <tr>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
-                  Product
+                  Description
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
-                  Size / Origin
+                  Area (m²)
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Quantity
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
-                  Price
+                  Rate
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Total
@@ -93,123 +80,124 @@
             </thead>
             <tbody class="tw-bg-white tw-divide-y tw-divide-gray-200">
               <tr v-for="(item, index) in invoice.items" :key="index">
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-gray-900">
-                  {{ item.productName }}
-                </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
-                  <div class="tw-font-medium tw-text-gray-700">{{ item.sizeLabel || '-' }}</div>
-                  <div class="tw-text-xs tw-text-gray-400">
-                    <span v-if="item.length">L: {{ item.length }}m</span>
-                    <span v-if="item.width">
-                      <span v-if="item.length"> · </span>
-                      W: {{ item.width }}m
-                    </span>
-                    <span v-if="item.origin">
-                      <span v-if="item.length || item.width"> · </span>
-                      {{ item.origin }}
-                    </span>
+                <td class="tw-px-6 tw-py-4 tw-align-top">
+                  <div class="tw-font-medium tw-text-gray-900">{{ item.productName }}</div>
+                  <div v-if="item.description" class="tw-text-xs tw-text-gray-500 tw-mt-1">{{ item.description }}</div>
+                  <div class="tw-text-xs tw-text-gray-400 tw-mt-1">
+                    <span v-if="item.sizeLabel">{{ item.sizeLabel }}</span>
+                    <span v-if="item.length">{{ item.length }}m</span>
+                    <span v-if="item.width">× {{ item.width }}m</span>
+                    <span v-if="item.origin">• {{ item.origin }}</span>
                   </div>
                 </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ formatArea(item.area) }}
+                </td>
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
                   {{ item.quantity }}
                 </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
-                  ${{ item.price.toFixed(2) }}
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ formatCurrency(item.price) }}
                 </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-900">
-                  ${{ item.total.toFixed(2) }}
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-900 tw-font-semibold">
+                  {{ formatCurrency(item.total) }}
                 </td>
               </tr>
             </tbody>
-            <tfoot class="tw-bg-gray-50">
-              <tr>
-                <td colspan="3" class="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-text-gray-900">
-                  Subtotal:
-                </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-gray-900">
-                  ${{ invoice.subtotal.toFixed(2) }}
-                </td>
-              </tr>
-              <tr>
-                <td colspan="3" class="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-text-gray-900">
-                  Tax:
-                </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-gray-900">
-                  ${{ invoice.tax.toFixed(2) }}
-                </td>
-              </tr>
-              <tr>
-                <td colspan="3" class="tw-px-6 tw-py-4 tw-text-right tw-text-lg tw-font-bold tw-text-gray-900">
-                  Total:
-                </td>
-                <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-lg tw-font-bold tw-text-gray-900">
-                  ${{ invoice.total.toFixed(2) }}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
-      </div>
 
-      <!-- Payments -->
-      <div class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6">
-        <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-gray-200 tw-pb-4 tw-mb-4">
+        <div class="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-justify-between tw-pt-4">
+          <div class="tw-text-sm tw-text-gray-600">
+            <div v-if="invoice.memo" class="tw-mb-2">
+              <p class="tw-font-semibold tw-text-gray-700">Notes</p>
+              <p>{{ invoice.memo }}</p>
+            </div>
+            <div v-if="invoice.terms" class="tw-text-sm tw-text-gray-600">
+              <p class="tw-font-semibold tw-text-gray-700">Terms</p>
+              <p>{{ invoice.terms }}</p>
+            </div>
+          </div>
+          <div class="tw-min-w-[260px]">
+            <table class="tw-w-full tw-text-sm">
+              <tbody class="tw-text-gray-700">
+                <tr>
+                  <td class="tw-py-1 tw-text-left">Subtotal</td>
+                  <td class="tw-py-1 tw-text-right tw-font-medium">{{ formatCurrency(invoice.subtotal) }}</td>
+                </tr>
+                <tr v-if="invoice.discountAmount && invoice.discountAmount > 0">
+                  <td class="tw-py-1 tw-text-left">Discount</td>
+                  <td class="tw-py-1 tw-text-right tw-text-emerald-600">-{{ formatCurrency(invoice.discountAmount) }}</td>
+                </tr>
+                <tr>
+                  <td class="tw-py-1 tw-text-left">Tax ({{ (invoice.taxRate || 0).toFixed(2) }}%)</td>
+                  <td class="tw-py-1 tw-text-right">{{ formatCurrency(invoice.tax) }}</td>
+                </tr>
+                <tr>
+                  <td class="tw-pt-3 tw-text-left tw-font-semibold tw-text-lg">Total</td>
+                  <td class="tw-pt-3 tw-text-right tw-font-semibold tw-text-lg">{{ formatCurrency(invoice.total) }}</td>
+                </tr>
+                <tr>
+                  <td class="tw-pt-2 tw-text-left tw-font-semibold tw-text-base">Balance Due</td>
+                  <td class="tw-pt-2 tw-text-right tw-font-semibold tw-text-base tw-text-rose-600">
+                    {{ formatCurrency(outstanding) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </VSheet>
+
+      <VSheet class="tw-bg-white tw-shadow tw-rounded-lg tw-p-6 tw-space-y-4">
+        <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-gray-200 tw-pb-4">
           <div>
             <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Payments</h2>
             <p class="tw-text-sm tw-text-gray-500">
-              Total Paid: ${{ totalPaid.toFixed(2) }} · Outstanding: ${{ Math.max(invoice.total - totalPaid, 0).toFixed(2) }}
+              Total Paid: {{ formatCurrency(totalPaid) }} · Outstanding: {{ formatCurrency(outstanding) }}
             </p>
           </div>
-          <button
-            @click="openPaymentModal"
-            class="tw-px-4 tw-py-2 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700 tw-text-sm"
-          >
+          <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true" prepend-icon="mdi-plus">
             Add Payment
-          </button>
+          </VBtn>
         </div>
-        <div v-if="invoice.payments && invoice.payments.length > 0" class="tw-space-y-3">
-          <div
+        <div v-if="invoice.payments?.length" class="tw-space-y-3">
+          <VCard
             v-for="(payment, idx) in invoice.payments"
             :key="idx"
-            class="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-flex tw-justify-between tw-items-center"
+            variant="flat"
+            class="tw-border tw-border-gray-200 tw-rounded-lg"
           >
-            <div>
-              <p class="tw-font-medium tw-text-gray-900">
-                ${{ payment.amount.toFixed(2) }} · {{ formatPaymentMethod(payment.method) }}
-              </p>
-              <p class="tw-text-sm tw-text-gray-500">
-                {{ new Date(payment.paidAt).toLocaleDateString() }}
-                <span v-if="payment.reference"> · Ref: {{ payment.reference }}</span>
-              </p>
-              <p v-if="payment.notes" class="tw-text-sm tw-text-gray-400 tw-mt-1">
-                {{ payment.notes }}
-              </p>
-            </div>
-            <span class="tw-text-xs tw-text-gray-400">
-              Recorded by {{ payment.recordedBy || 'system' }}
-            </span>
-          </div>
+            <VCardText class="tw-flex tw-justify-between tw-items-center tw-gap-4">
+              <div>
+                <p class="tw-font-medium tw-text-gray-900">{{ formatCurrency(payment.amount) }} · {{ formatPaymentMethod(payment.method) }}</p>
+                <p class="tw-text-sm tw-text-gray-500">
+                  {{ formatDate(payment.paidAt) }}<span v-if="payment.reference"> · Ref: {{ payment.reference }}</span>
+                </p>
+                <p v-if="payment.notes" class="tw-text-sm tw-text-gray-400 tw-mt-1">
+                  {{ payment.notes }}
+                </p>
+              </div>
+              <span class="tw-text-xs tw-text-gray-400">
+                Recorded by {{ payment.recordedBy || 'system' }}
+              </span>
+            </VCardText>
+          </VCard>
         </div>
         <div v-else class="tw-text-sm tw-text-gray-500">
           No payments recorded yet.
         </div>
-      </div>
+      </VSheet>
 
-      <!-- Actions -->
-      <div class="tw-flex tw-justify-end tw-space-x-3">
-        <NuxtLink
-          to="/invoices"
-          class="tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-gray-700 hover:tw-bg-gray-50"
-        >
-          Back to Invoices
-        </NuxtLink>
-        <NuxtLink
-          :to="`/invoices/${invoice._id}/edit`"
+      <div class="tw-flex tw-justify-end tw-gap-3">
+        <VBtn variant="text" color="secondary" to="/invoices">Back to Invoices</VBtn>
+        <VBtn
           v-if="invoice.status === 'draft'"
-          class="tw-px-4 tw-py-2 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700"
+          color="primary"
+          :to="`/invoices/${invoice._id}/edit`"
         >
           Edit Invoice
-        </NuxtLink>
+        </VBtn>
       </div>
     </div>
 
@@ -221,91 +209,92 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
-  <div
-    v-if="showPaymentModal"
-    class="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-flex tw-items-center tw-justify-center tw-z-50"
-  >
-    <div class="tw-bg-white tw-rounded-lg tw-shadow-xl tw-max-w-lg tw-w-full">
-      <div class="tw-px-6 tw-py-4 tw-border-b tw-border-gray-200 tw-flex tw-justify-between tw-items-center">
-        <h3 class="tw-text-lg tw-font-semibold tw-text-gray-900">Record Payment</h3>
-        <button @click="closePaymentModal" class="tw-text-gray-400 hover:tw-text-gray-600">
-          <svg class="tw-w-6 tw-h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+  <VDialog v-model="showPaymentModal" max-width="600" transition="dialog-bottom-transition">
+    <VCard class="tw-rounded-3xl tw-overflow-hidden">
+      <div class="tw-bg-gradient-to-r tw-from-orange-500 tw-to-red-500 tw-px-6 tw-py-5 tw-text-white">
+        <div class="tw-flex tw-justify-between tw-items-start tw-gap-4">
+          <div class="tw-space-y-1">
+            <p class="tw-text-xs tw-uppercase tw-tracking-[0.2em] tw-opacity-80">Outstanding Balance</p>
+            <p class="tw-text-3xl tw-font-semibold">{{ formatCurrency(outstanding) }}</p>
+            <p class="tw-text-sm tw-opacity-80">Record a payment to reduce the balance.</p>
+          </div>
+          <VBtn icon="mdi-close" variant="text" color="white" @click="closePaymentModal" />
+        </div>
       </div>
-      <form @submit.prevent="submitPayment" class="tw-px-6 tw-py-4 tw-space-y-4">
-        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-          <div>
-            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Amount *</label>
-            <input
-              v-model.number="paymentForm.amount"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
-            />
-          </div>
-          <div>
-            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Method</label>
-            <select
-              v-model="paymentForm.method"
-              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
-            >
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="cheque">Cheque</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Reference</label>
-            <input
-              v-model="paymentForm.reference"
-              type="text"
-              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
-            />
-          </div>
-          <div>
-            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Payment Date</label>
-            <input
-              v-model="paymentForm.paidAt"
-              type="date"
-              class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
-            />
-          </div>
-        </div>
-        <div>
-          <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Notes</label>
-          <textarea
+
+      <VForm @submit.prevent="submitPayment">
+        <VCardText class="tw-space-y-5 tw-bg-white tw-py-6">
+          <VRow>
+            <VCol cols="12" md="6">
+              <VTextField
+                v-model.number="paymentForm.amount"
+                label="Amount"
+                type="number"
+                min="0"
+                step="0.01"
+                variant="outlined"
+                density="comfortable"
+                color="primary"
+                prepend-inner-icon="mdi-cash"
+                required
+              />
+            </VCol>
+            <VCol cols="12" md="6">
+              <VSelect
+                v-model="paymentForm.method"
+                :items="paymentMethods"
+                item-title="label"
+                item-value="value"
+                label="Method"
+                variant="outlined"
+                density="comfortable"
+                color="primary"
+                prepend-inner-icon="mdi-bank"
+              />
+            </VCol>
+            <VCol cols="12" md="6">
+              <VTextField
+                v-model="paymentForm.reference"
+                label="Reference"
+                variant="outlined"
+                density="comfortable"
+                color="primary"
+                prepend-inner-icon="mdi-pound"
+              />
+            </VCol>
+            <VCol cols="12" md="6">
+              <VTextField
+                v-model="paymentForm.paidAt"
+                label="Payment Date"
+                type="date"
+                variant="outlined"
+                density="comfortable"
+                color="primary"
+                prepend-inner-icon="mdi-calendar"
+              />
+            </VCol>
+          </VRow>
+          <VTextarea
             v-model="paymentForm.notes"
+            label="Notes"
             rows="3"
-            class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-orange-500"
+            auto-grow
+            variant="outlined"
+            density="comfortable"
+            color="primary"
+            prepend-inner-icon="mdi-note-text"
           />
-        </div>
-        <div class="tw-flex tw-justify-end tw-space-x-3 tw-pt-4 tw-border-t">
-          <button
-            type="button"
-            @click="closePaymentModal"
-            class="tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-gray-700 hover:tw-bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            :disabled="savingPayment"
-            class="tw-px-6 tw-py-2 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700 disabled:tw-opacity-50"
-          >
-            <span v-if="savingPayment">Saving...</span>
-            <span v-else>Save Payment</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+        </VCardText>
+        <VDivider />
+        <VCardActions class="tw-bg-white tw-px-6 tw-py-4 tw-justify-end tw-gap-2">
+          <VBtn variant="text" color="secondary" @click="closePaymentModal">Cancel</VBtn>
+          <VBtn color="primary" type="submit" class="tw-font-semibold" :loading="savingPayment" :disabled="savingPayment">
+            Save Payment
+          </VBtn>
+        </VCardActions>
+      </VForm>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup lang="ts">
@@ -335,6 +324,14 @@ const paymentForm = reactive({
   paidAt: ''
 })
 
+const paymentMethods = [
+  { label: 'Bank Transfer', value: 'bank_transfer' },
+  { label: 'Cash', value: 'cash' },
+  { label: 'Card', value: 'card' },
+  { label: 'Cheque', value: 'cheque' },
+  { label: 'Other', value: 'other' }
+]
+
 onMounted(async () => {
   await loadInvoice()
 })
@@ -349,28 +346,50 @@ const loadInvoice = async () => {
   }
 }
 
+const currencyCode = computed(() => invoice.value?.currency || 'USD')
+
 const totalPaid = computed(() => {
   if (!invoice.value?.payments) return 0
   return invoice.value.payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
 })
 
+const outstanding = computed(() => {
+  if (!invoice.value) return 0
+  return Math.max(invoice.value.total - totalPaid.value, 0)
+})
+
+const statusColor = computed(() => {
+  switch (invoice.value?.status) {
+    case 'paid':
+      return 'green'
+    case 'sent':
+      return 'blue'
+    case 'cancelled':
+      return 'red'
+    default:
+      return 'grey'
+  }
+})
+
 const downloadPDF = async () => {
+  if (!invoice.value) return
   try {
-    const html = await $fetch<string>(`/api/invoices/${route.params.id}/pdf`)
-    const printWindow = window.open('', '_blank')
-    if (printWindow) {
-      printWindow.document.write(html)
-      printWindow.document.close()
-      printWindow.print()
-    }
+    const buffer = await $fetch<ArrayBuffer>(`/api/invoices/${route.params.id}/pdf`, {
+      responseType: 'arrayBuffer'
+    })
+    const blob = new Blob([buffer], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `invoice-${invoice.value.invoiceNumber}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   } catch (error) {
     console.error('Error generating PDF:', error)
     alert('Failed to generate PDF')
   }
-}
-
-const openPaymentModal = () => {
-  showPaymentModal.value = true
 }
 
 const closePaymentModal = () => {
@@ -395,6 +414,27 @@ const formatPaymentMethod = (method: string) => {
     default:
       return 'Other'
   }
+}
+
+const formatCurrency = (value: number) => {
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode.value }).format(value || 0)
+  } catch (error) {
+    console.warn('Currency formatting failed', error)
+    return `$${Number(value || 0).toFixed(2)}`
+  }
+}
+
+const formatDate = (value?: string | Date) => {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString()
+}
+
+const formatArea = (value?: number) => {
+  if (!value || value <= 0) return '—'
+  return `${value.toFixed(2)}`
 }
 
 const submitPayment = async () => {

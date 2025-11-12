@@ -27,10 +27,10 @@
           <VStepperWindow class="tw-pt-6 tw-space-y-6">
             <VStepperWindowItem value="0">
               <section class="card-shell tw-space-y-5">
-                <div>
-                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoice information</h2>
-                  <p class="tw-text-sm tw-text-gray-500">Reference details shown on the invoice header.</p>
-                </div>
+          <div>
+            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoice information</h2>
+            <p class="tw-text-sm tw-text-gray-500">Reference details shown on the invoice header.</p>
+          </div>
                 <VRow dense>
                   <VCol cols="12" md="4">
                     <VTextField v-model="form.invoiceNumber" label="Invoice number" variant="outlined"
@@ -61,15 +61,15 @@
                 <VTextarea v-model="form.memo" label="Memo (visible to client)" rows="3" auto-grow variant="outlined"
                   density="comfortable" color="primary"
                   placeholder="Thank you for your business. Please include invoice number with payment." />
-              </section>
+        </section>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="1">
               <section class="card-shell tw-space-y-5">
-                <div>
-                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Bill to</h2>
-                  <p class="tw-text-sm tw-text-gray-500">Specify who will receive this invoice.</p>
-                </div>
+          <div>
+            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Bill to</h2>
+            <p class="tw-text-sm tw-text-gray-500">Specify who will receive this invoice.</p>
+          </div>
                 <VRow dense>
                   <VCol cols="12" md="6">
                     <VTextField v-model="form.customerName" label="Client name" variant="outlined" density="comfortable"
@@ -86,21 +86,21 @@
                       variant="outlined" density="comfortable" color="primary" placeholder="Street, City, Country" />
                   </VCol>
                 </VRow>
-              </section>
+        </section>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="2">
               <div class="tw-space-y-6">
                 <section class="card-shell tw-space-y-5">
                   <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-                    <div>
+              <div>
                       <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Carpet defaults</h2>
                       <p class="tw-text-sm tw-text-gray-500">Prefill metadata applied to newly added line items.</p>
-                    </div>
+              </div>
                     <VBtn variant="text" color="secondary" @click="resetCarpetDefaults">
                       Reset
                     </VBtn>
-                  </div>
+            </div>
                   <VRow dense>
                     <VCol cols="12" md="3">
                       <VTextField v-model="carpetDefaults.sizeLabel" label="Label" variant="outlined"
@@ -123,11 +123,11 @@
 
                 <section class="card-shell tw-space-y-6">
                   <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-                    <div>
+      <div>
                       <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Line items</h2>
                       <p class="tw-text-sm tw-text-gray-500">Capture quantity, pricing, and carpet metadata per item.
                       </p>
-                    </div>
+              </div>
                     <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                       <VBtn variant="text" color="secondary" @click="showProductSelector = true">
                         Import from CCV Shop
@@ -135,8 +135,8 @@
                       <VBtn variant="tonal" color="primary" @click="addEmptyItem">
                         + Add custom item
                       </VBtn>
-                    </div>
-                  </div>
+              </div>
+        </div>
 
                   <VAlert v-if="fieldErrors.items" type="error" variant="tonal" density="comfortable"
                     class="tw-rounded-2xl">
@@ -145,8 +145,8 @@
 
                   <div v-if="form.items.length === 0"
                     class="tw-border-2 tw-border-dashed tw-border-gray-200 tw-rounded-2xl tw-py-12 tw-text-center tw-text-sm tw-text-gray-500">
-                    No items yet. Import from CCV Shop or add a custom entry.
-                  </div>
+              No items yet. Import from CCV Shop or add a custom entry.
+        </div>
 
                   <div v-else class="tw-space-y-4">
                     <VCard v-for="(item, index) in form.items" :key="index" variant="outlined"
@@ -160,11 +160,11 @@
                                 ? [fieldErrors.lineItems[index]?.productName]
                                 : []
                                 " />
-                          </div>
+                  </div>
                           <VBtn variant="text" color="error" class="tw-self-start" @click="removeItem(index)">
                             Remove
                           </VBtn>
-                        </div>
+                </div>
 
                         <VTextarea v-model="item.description" label="Description" rows="2" auto-grow variant="outlined"
                           density="comfortable" color="primary" placeholder="Describe materials, weave, or condition" />
@@ -218,9 +218,9 @@
                         </VRow>
                       </VCardText>
                     </VCard>
-                  </div>
+                </div>
                 </section>
-              </div>
+                  </div>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="3">
@@ -242,27 +242,27 @@
                         :placeholder="form.discountType === 'amount' ? '0.00' : '0%'" />
                     </VCol>
                   </VRow>
-                </section>
+        </section>
 
                 <section class="card-shell tw-space-y-3">
                   <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
-                    <span>Subtotal</span>
-                    <span>{{ formatCurrency(subtotal, form.currency) }}</span>
-                  </div>
+              <span>Subtotal</span>
+              <span>{{ formatCurrency(subtotal, form.currency) }}</span>
+            </div>
                   <div v-if="form.discountAmount > 0" class="tw-flex tw-items-center tw-justify-between tw-text-sm">
-                    <span>Discount</span>
+              <span>Discount</span>
                     <span class="tw-text-emerald-600">-{{ formatCurrency(form.discountAmount, form.currency) }}</span>
-                  </div>
+        </div>
                   <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
-                    <span>Tax ({{ form.taxRate }}%)</span>
-                    <span>{{ formatCurrency(taxAmount, form.currency) }}</span>
-                  </div>
+              <span>Tax ({{ form.taxRate }}%)</span>
+              <span>{{ formatCurrency(taxAmount, form.currency) }}</span>
+        </div>
                   <div
                     class="tw-flex tw-items-center tw-justify-between tw-text-base tw-font-semibold tw-text-gray-900">
-                    <span>Total due</span>
-                    <span>{{ formatCurrency(total, form.currency) }}</span>
-                  </div>
-                </section>
+              <span>Total due</span>
+              <span>{{ formatCurrency(total, form.currency) }}</span>
+      </div>
+        </section>
               </div>
             </VStepperWindowItem>
           </VStepperWindow>
@@ -279,19 +279,20 @@
                   <VBtn color="primary" @click="handleNextStep">
                     Next
                   </VBtn>
-                </template>
-                <template v-else>
+          </template>
+          <template v-else>
                   <div class="tw-flex tw-flex-wrap tw-justify-end tw-gap-2">
-                    <VBtn variant="text" color="secondary" @click="saveDraft" :disabled="submitting">
-                      Save draft
-                    </VBtn>
-                    <VBtn color="primary" :loading="submitting" @click="submitInvoice(true)"
-                      :disabled="submitting || disabledSubmit">
-                      Save &amp; send
+                    <VBtn
+                      color="primary"
+                      :loading="submitting"
+                      @click="submitInvoice(false)"
+                      :disabled="submitting || disabledSubmit"
+                    >
+                      Save
                     </VBtn>
                   </div>
-                </template>
-              </div>
+          </template>
+      </div>
             </template>
           </VStepperActions>
         </VStepper>
@@ -308,26 +309,26 @@
         </div>
       </aside>
     </div>
-  </div>
+    </div>
 
   <VDialog v-model="showProductSelector" max-width="900" scrollable>
     <VCard>
       <VCardTitle class="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <div>
+          <div>
           <h3 class="tw-text-lg tw-font-semibold tw-text-gray-900">Import from CCV Shop</h3>
           <p class="tw-text-sm tw-text-gray-500">Select products to convert directly into invoice line items.</p>
-        </div>
+          </div>
         <VBtn variant="text" color="secondary" @click="showProductSelector = false">
-          Close
+            Close
         </VBtn>
       </VCardTitle>
       <VCardText>
         <div v-if="loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
-          Loading products...
-        </div>
+            Loading products...
+          </div>
         <div v-else-if="products.length === 0" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
-          No products available.
-        </div>
+            No products available.
+          </div>
         <div v-else class="tw-space-y-3">
           <VSheet v-for="product in products" :key="product.id"
             class="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border tw-border-gray-100 tw-rounded-2xl tw-px-4 tw-py-3 hover:tw-bg-gray-50 tw-transition">
@@ -335,18 +336,18 @@
               <p class="tw-font-medium tw-text-gray-900">{{ product.name }}</p>
               <p class="tw-text-sm tw-text-gray-500">{{ formatCurrency(product.price, form.currency) }}</p>
               <p v-if="product.stock !== undefined" class="tw-text-xs tw-text-gray-400">
-                Stock: {{ product.stock }}
-              </p>
-            </div>
+                  Stock: {{ product.stock }}
+                </p>
+              </div>
             <div class="tw-flex tw-items-center tw-gap-2">
               <VTextField v-model.number="productQuantities[product.id]" type="number" min="1" :max="product.stock"
                 label="Qty" variant="outlined" density="comfortable" color="primary" class="tw-w-24" />
               <VBtn color="primary" variant="tonal" @click="addProduct(product)">
                 Add
               </VBtn>
-            </div>
+              </div>
           </VSheet>
-        </div>
+            </div>
       </VCardText>
     </VCard>
   </VDialog>
@@ -777,7 +778,7 @@ function addProduct(product: any) {
     alert('Quantity exceeds available stock')
     return
   }
-
+  
   form.items.push({
     productId: product.id,
     productName: product.name,
@@ -1051,8 +1052,8 @@ function buildPreviewHtml(payload: {
           </thead>
           <tbody>
             ${payload.items
-      .map(
-        (item) => `
+              .map(
+                (item) => `
             <tr>
               <td>
                 <div style="font-weight:600;color:#0f172a;">${item.productName}</div>
@@ -1064,8 +1065,8 @@ function buildPreviewHtml(payload: {
               <td>${formatCurrency(item.total)}</td>
             </tr>
           `
-      )
-      .join('')}
+              )
+              .join('')}
           </tbody>
         </table>
 
@@ -1156,16 +1157,9 @@ async function submitInvoice(sendEmail: boolean) {
     })
 
     if (sendEmail && response?.invoice?._id) {
-      await $fetch(`/api/invoices/${response.invoice._id}/email`, {
-        method: 'POST',
-        body: {
-          to: form.customerEmail,
-          subject: `Invoice ${form.invoiceNumber}`,
-          message: form.memo || 'Please find your invoice attached.'
-        }
-      })
+      // Email sending temporarily disabled.
     }
-
+    
     await router.push(`/invoices/${response.invoice._id}`)
   } catch (error: any) {
     alert(error?.data?.message || 'Failed to create invoice')
@@ -1173,10 +1167,6 @@ async function submitInvoice(sendEmail: boolean) {
   } finally {
     submitting.value = false
   }
-}
-
-async function saveDraft() {
-  await submitInvoice(false)
 }
 
 function prefillDemo() {

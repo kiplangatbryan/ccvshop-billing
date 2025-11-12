@@ -165,19 +165,6 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
             company.taxId ? { text: `Tax Registration: ${company.taxId}`, style: 'companyInfo' } : null,
             company.bankDetails ? { text: `Bank Details:\n${company.bankDetails}`, style: 'companyInfo' } : null
           ].filter(Boolean),
-          {
-            width: 'auto',
-            table: {
-              body: [
-                [{ text: 'INVOICE NO.', style: 'metaLabel' }, { text: invoice.invoiceNumber, style: 'metaValue' }],
-                [{ text: 'DATE', style: 'metaLabel' }, { text: formatDate(invoice.invoiceDate || invoice.createdAt), style: 'metaValue' }],
-                [{ text: 'DUE DATE', style: 'metaLabel' }, { text: formatDate(invoice.dueDate), style: 'metaValue' }],
-                [{ text: 'STATUS', style: 'metaLabel' }, { text: invoice.status.toUpperCase(), style: 'metaValue' }]
-              ]
-            },
-            layout: 'noBorders',
-            margin: [24, 0, 16, 0]
-          },
           logoImage
             ? {
                 image: logoImage,
@@ -192,7 +179,7 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
         canvas: [
           { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#e5e7eb' }
         ],
-        margin: [0, 20, 0, 20]
+        margin: [0, 10, 0, 10]
       },
       {
         columns: [
@@ -200,17 +187,36 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
             { text: 'BILL TO', style: 'sectionHeader' },
             { text: invoice.customerName, style: 'billToName', margin: [0, 4, 0, 2] },
             invoice.customerEmail ? { text: invoice.customerEmail, style: 'billToDetail' } : null
-          ].filter(Boolean)
+          ].filter(Boolean),
+          {
+            width: 'auto',
+            table: {
+              body: [
+                [{ text: 'INVOICE NO.', style: 'metaLabel' }, { text: invoice.invoiceNumber, style: 'metaValue' }],
+                [{ text: 'DATE', style: 'metaLabel' }, { text: formatDate(invoice.invoiceDate || invoice.createdAt), style: 'metaValue' }],
+                [{ text: 'DUE DATE', style: 'metaLabel' }, { text: formatDate(invoice.dueDate), style: 'metaValue' }],
+                // [{ text: 'STATUS', style: 'metaLabel' }, { text: invoice.status.toUpperCase(), style: 'metaValue' }]
+              ]
+            },
+            layout: 'noBorders',
+            alignment: 'right'
+          }
         ]
       },
-      { text: 'Activity', style: 'sectionHeader', margin: [0, 30, 0, 8] },
+      {
+        canvas: [
+          { type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: '#e5e7eb' }
+        ],
+        margin: [0, 10, 0, 10]
+      },
+      // { text: 'Activity', style: 'sectionHeader', margin: [0, 30, 0, 8] },
       {
         table: {
           headerRows: 1,
           widths: ['*', 'auto', 'auto', 'auto', 'auto'],
           body: [
             [
-              { text: 'ACTIVITY', style: 'tableHeader' },
+              { text: 'DESCRIPTION', style: 'tableHeader' },
               { text: 'QTY', style: 'tableHeader', alignment: 'right' },
               { text: taxRate ? 'RATE (per m²)' : 'RATE', style: 'tableHeader', alignment: 'right' },
               { text: taxRate ? `VAT ${taxRate.toFixed(2)}%` : 'TAX', style: 'tableHeader', alignment: 'right' },
@@ -261,7 +267,7 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
       sectionHeader: { fontSize: 12, bold: true, color: '#1f2937' },
       billToName: { fontSize: 11, bold: true, color: '#111827' },
       billToDetail: { fontSize: 10, color: '#4b5563' },
-      tableHeader: { fontSize: 10, bold: true, color: '#1f2937' },
+      tableHeader: { fontSize: 10, bold: true, color: '#1f2937', padding: [2, 2, 2, 2] },
       tableItemTitle: { fontSize: 10, bold: true, color: '#111827' },
       tableItemSub: { fontSize: 9, color: '#6b7280', margin: [0, 2, 0, 0] },
       notes: { fontSize: 9, color: '#4b5563' },
