@@ -2,8 +2,8 @@
   <div class="app-wrapper">
     <header class="top-nav">
       <NuxtLink to="/invoices" class="brand">
-        <span class="brand-mark">ZI</span>
-        <span class="brand-name">Zargar</span>
+        <span class="brand-mark">Z|</span>
+        <span class="brand-name">Invoice</span>
       </NuxtLink>
 
       <nav class="nav-links">
@@ -19,8 +19,33 @@
       </nav>
 
       <div class="nav-actions" v-if="user">
-        <span class="user-label">Hi, {{ user.name || 'System Admin' }}</span>
-        <button class="btn-ghost" @click="handleLogout">Log out</button>
+        <VBtn icon variant="text" color="primary" class="tw-relative tw-mr-4">
+          <VIcon size="22">mdi-bell-outline</VIcon>
+          <span class="tw-absolute tw-top-2 tw-right-2 tw-w-2 tw-h-2 tw-rounded-full tw-bg-red-500"></span>
+        </VBtn>
+        <VMenu offset-y>
+          <template #activator="{ props }">
+            <VBtn
+              v-bind="props"
+              variant="text"
+              class="tw-rounded-full tw-pl-2 tw-pr-3 tw-flex tw-items-center tw-space-x-5 tw-hover:bg-gray-100 tw-transition-colors"
+            >
+              <VAvatar color="success" size="34">
+                <span class="tw-text-white tw-font-semibold">{{ userInitials }}</span>
+              </VAvatar>
+              <div class="tw-flex tw-flex-col tw-items-start tw-leading-tight">
+                <span class="tw-text-sm tw-font-semibold tw-text-gray-900">{{ brandName }}</span>
+                <span class="tw-text-xs tw-text-gray-400">Brand</span>
+              </div>
+              <VIcon size="18">mdi-chevron-down</VIcon>
+            </VBtn>
+          </template>
+          <VList>
+            <VListItem @click="handleLogout">
+              <VListItemTitle>Log out</VListItemTitle>
+            </VListItem>
+          </VList>
+        </VMenu>
       </div>
     </header>
 
@@ -33,6 +58,7 @@
 <script setup lang="ts">
 import { useRouter } from '#imports'
 import { useAuth } from '~/composables/useAuth'
+import { VAvatar, VBtn, VIcon, VList, VListItem, VListItemTitle, VMenu } from 'vuetify/components'
 
 const { user, logout } = useAuth()
 const router = useRouter()
@@ -47,6 +73,17 @@ const handleLogout = async () => {
   await logout()
   await router.push('/login')
 }
+
+const userInitials = computed(() => {
+  const name = user.value?.name || 'Z|Invoice'
+  const words = name.trim().split(' ')
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase()
+  }
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
+})
+
+const brandName = computed(() => user.value?.name || 'Z|Invoice')
 </script>
 
 <style scoped>
@@ -64,7 +101,7 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 40px;
+  padding: 10px 40px;
   background: var(--surface);
   border-bottom: 1px solid var(--border-color);
 }

@@ -67,20 +67,28 @@
     </VSheet>
 
     <section class="tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-4">
-      <div
+      <VSheet
         v-for="card in summaryCards"
         :key="card.label"
-        class="card-shell tw-flex tw-flex-col tw-gap-3"
+        elevation="1"
+        class="tw-rounded-3xl tw-border tw-border-gray-200 tw-bg-white tw-p-6 tw-shadow-sm tw-flex tw-flex-col tw-gap-4 tw-transition-shadow hover:tw-shadow-md"
       >
-        <div class="tw-flex tw-items-center tw-justify-between">
-          <span class="tw-text-sm tw-font-medium tw-text-gray-500">{{ card.label }}</span>
-          <span :class="['badge-soft', card.trend >= 0 ? 'badge-green' : 'badge-red']">
+        <div class="tw-flex tw-items-start tw-justify-between">
+          <div>
+            <p class="tw-text-sm tw-font-medium tw-text-gray-500">{{ card.label }}</p>
+            <p class="tw-text-2xl tw-font-semibold tw-text-gray-900">{{ card.value }}</p>
+          </div>
+          <VChip
+            :color="card.trend >= 0 ? (card.positive ? 'success' : 'error') : card.positive ? 'error' : 'success'"
+            variant="flat"
+            size="small"
+            class="tw-font-semibold tw-rounded-full"
+          >
             {{ card.trend >= 0 ? '+' : '' }}{{ card.trend }}%
-          </span>
+          </VChip>
         </div>
-        <p class="tw-text-2xl tw-font-semibold tw-text-gray-900">{{ card.value }}</p>
-        <p class="tw-text-xs tw-text-gray-400">{{ card.helper }}</p>
-      </div>
+        <p class="tw-text-xs tw-text-gray-500">{{ card.helper }}</p>
+      </VSheet>
     </section>
 
     <section class="tw-grid tw-gap-6 xl:tw-grid-cols-[1.55fr,1fr]">
@@ -244,18 +252,37 @@ const filters = reactive({
   dateTo: ''
 })
 
-const summary = reactive({
+interface SummaryMetrics {
+  billed: number
+  outstanding: number
+  sent: number
+  clients: number
+}
+
+const globalSummary = reactive<SummaryMetrics>({
   billed: 0,
   outstanding: 0,
   sent: 0,
   clients: 0
 })
 
+const calculateSummary = (list: any[]): SummaryMetrics => {
+  const billed = list.reduce((sum: number, invoice: any) => sum + (Number(invoice.total) || 0), 0)
+  const outstanding = list.reduce((sum: number, invoice: any) => {
+    const paid = getPaidAmount(invoice)
+    return sum + Math.max((Number(invoice.total) || 0) - paid, 0)
+  }, 0)
+  const sent = list.length
+  const clients = new Set(list.map((invoice: any) => invoice.customerEmail)).size
+
+  return { billed, outstanding, sent, clients }
+}
+
 onMounted(async () => {
   try {
     const data = await $fetch<any[]>('/api/invoices')
     invoices.value = data
-    computeSummary()
+    Object.assign(globalSummary, calculateSummary(data))
     if (data.length) {
       selectedInvoice.value = data[0]
     }
@@ -282,6 +309,8 @@ const filteredInvoices = computed(() => {
   })
 })
 
+const currentSummary = computed<SummaryMetrics>(() => calculateSummary(filteredInvoices.value))
+
 watch(filteredInvoices, (list) => {
   if (!list.length) {
     selectedInvoice.value = null
@@ -292,43 +321,48 @@ watch(filteredInvoices, (list) => {
   }
 })
 
-const summaryCards = computed(() => [
-  {
-    label: 'Total billed',
-    value: formatCurrency(summary.billed),
-    trend: 4.8,
-    helper: 'Across all invoices'
-  },
-  {
-    label: 'Outstanding',
-    value: formatCurrency(summary.outstanding),
-    trend: -2.1,
-    helper: 'Awaiting payment'
-  },
-  {
-    label: 'Invoices sent',
-    value: summary.sent.toString(),
-    trend: 3.4,
-    helper: 'Active this quarter'
-  },
-  {
-    label: 'Clients billed',
-    value: summary.clients.toString(),
-    trend: 3.2,
-    helper: 'Unique customers'
-  }
-])
+const summaryCards = computed(() => {
+  const current = currentSummary.value
+  const baseline = globalSummary
 
-function computeSummary() {
-  if (!invoices.value.length) return
-  summary.billed = invoices.value.reduce((sum: number, invoice: any) => sum + invoice.total, 0)
-  summary.outstanding = invoices.value.reduce((sum: number, invoice: any) => {
-    const paid = getPaidAmount(invoice)
-    return sum + Math.max(invoice.total - paid, 0)
-  }, 0)
-  summary.sent = invoices.value.length
-  summary.clients = new Set(invoices.value.map((invoice: any) => invoice.customerEmail)).size
-}
+  const percentChange = (currentValue: number, baseValue: number) => {
+    if (baseValue === 0) {
+      return currentValue === 0 ? 0 : 100
+    }
+    return Math.round(((currentValue - baseValue) / baseValue) * 1000) / 10
+  }
+
+  return [
+    {
+      label: 'Total billed',
+      value: formatCurrency(current.billed),
+      trend: percentChange(current.billed, baseline.billed),
+      helper: 'Across all invoices',
+      positive: true
+    },
+    {
+      label: 'Outstanding',
+      value: formatCurrency(current.outstanding),
+      trend: percentChange(current.outstanding, baseline.outstanding),
+      helper: 'Awaiting payment',
+      positive: false
+    },
+    {
+      label: 'Invoices sent',
+      value: current.sent.toString(),
+      trend: percentChange(current.sent, baseline.sent),
+      helper: 'Active in selection',
+      positive: true
+    },
+    {
+      label: 'Clients billed',
+      value: current.clients.toString(),
+      trend: percentChange(current.clients, baseline.clients),
+      helper: 'Unique customers',
+      positive: true
+    }
+  ]
+})
 
 function resetFilters() {
   filters.search = ''
