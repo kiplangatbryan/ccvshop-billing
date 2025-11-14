@@ -52,24 +52,30 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
   }
 
   const itemRows = invoice.items.map((item) => {
+    // Area is already in m² (calculated from cm), or calculate it if missing
     const area =
       typeof item.area === 'number'
         ? item.area
         : item.length && item.width
-          ? Number(item.length) * Number(item.width)
+          ? (Number(item.length) * Number(item.width)) / 10000 // Convert cm² to m²
           : null
 
     const vatAmount = taxRate ? (item.total * taxRate) / 100 : 0
+
+    // Build serial number and origin text
+    const serialText = item.productId ? `Serial: ${item.productId}` : ''
+    const originText = item.origin ? `• ${item.origin}` : ''
+    const serialOriginText = [serialText, originText].filter(Boolean).join(' ')
 
     return [
       {
         stack: [
           { text: item.productName, style: 'tableItemTitle' },
           item.description ? { text: item.description, style: 'tableItemSub' } : null,
-          area ? { text: `Area: ${area.toFixed(2)} m²`, style: 'tableItemSub' } : null,
-          item.sizeLabel || item.origin
+          area ? { text: `Area: ${area.toFixed(4)} m²`, style: 'tableItemSub' } : null,
+          serialOriginText
             ? {
-                text: [item.sizeLabel || '', item.origin ? `• ${item.origin}` : ''].filter(Boolean).join(' '),
+                text: serialOriginText,
                 style: 'tableItemSub'
               }
             : null
@@ -227,7 +233,7 @@ export async function buildInvoicePdf(invoice: Invoice, company: CompanyInfo) {
             [
               { text: 'DESCRIPTION', style: 'tableHeader' },
               { text: 'QTY', style: 'tableHeader', alignment: 'right' },
-              { text: taxRate ? 'RATE (per m²)' : 'RATE', style: 'tableHeader', alignment: 'right' },
+              { text: 'Price per m²', style: 'tableHeader', alignment: 'right' },
               { text: taxRate ? `VAT ${taxRate.toFixed(2)}%` : 'TAX', style: 'tableHeader', alignment: 'right' },
               { text: 'AMOUNT', style: 'tableHeader', alignment: 'right' }
             ],

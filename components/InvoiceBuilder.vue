@@ -48,13 +48,29 @@
           </div>
                 <VRow dense>
                   <VCol cols="12" md="4">
-                    <VTextField v-model="form.invoiceNumber" label="Invoice number" variant="outlined"
-                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.invoiceNumber)"
-                      :error-messages="fieldErrors.invoiceNumber ? [fieldErrors.invoiceNumber] : []" />
+                    <VTextField 
+                      v-model="form.invoiceNumber" 
+                      label="Invoice number" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary" 
+                      required 
+                      :error="Boolean(fieldErrors.invoiceNumber)"
+                      :error-messages="fieldErrors.invoiceNumber ? [fieldErrors.invoiceNumber] : []"
+                      :readonly="!isEdit"
+                      hint="Auto-generated invoice number"
+                      persistent-hint
+                    />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VSelect v-model="form.currency" :items="currencyItems" label="Currency" variant="outlined"
-                      density="comfortable" color="primary" />
+                    <VSelect 
+                      v-model="form.currency" 
+                      :items="currencyItems" 
+                      label="Currency" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary"
+                    />
                   </VCol>
                   <VCol v-if="isEdit" cols="12" md="4">
                     <VSelect
@@ -69,25 +85,58 @@
                     />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField v-model.number="form.taxRate" type="number" min="0" step="0.1" label="Tax rate (%)"
-                      variant="outlined" density="comfortable" color="primary" />
+                    <VTextField 
+                      v-model.number="form.taxRate" 
+                      type="number" 
+                      min="0" 
+                      step="0.1" 
+                      label="Tax rate (%)"
+                      variant="outlined" 
+                      density="comfortable" 
+                      color="primary"
+                    />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField v-model="form.invoiceDate" type="date" label="Invoice date" variant="outlined"
-                      density="comfortable" color="primary" />
+                    <VTextField 
+                      v-model="form.invoiceDate" 
+                      type="date" 
+                      label="Invoice date" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary"
+                    />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField v-model="form.dueDate" type="date" label="Due date" variant="outlined"
-                      density="comfortable" color="primary" />
+                    <VTextField 
+                      v-model="form.dueDate" 
+                      type="date" 
+                      label="Due date" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary"
+                    />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField v-model="form.terms" label="Payment terms" placeholder="Net 30" variant="outlined"
-                      density="comfortable" color="primary" />
+                    <VTextField 
+                      v-model="form.terms" 
+                      label="Payment terms" 
+                      placeholder="Net 30" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary"
+                    />
                   </VCol>
                 </VRow>
-                <VTextarea v-model="form.memo" label="Memo (visible to client)" rows="3" auto-grow variant="outlined"
-                  density="comfortable" color="primary"
-                  placeholder="Thank you for your business. Please include invoice number with payment." />
+                <VTextarea 
+                  v-model="form.memo" 
+                  label="Memo (visible to client)" 
+                  rows="3" 
+                  auto-grow 
+                  variant="outlined"
+                  density="comfortable" 
+                  color="primary"
+                  placeholder="Thank you for your business. Please include invoice number with payment."
+                />
         </section>
             </VStepperWindowItem>
 
@@ -99,18 +148,41 @@
           </div>
                 <VRow dense>
                   <VCol cols="12" md="6">
-                    <VTextField v-model="form.customerName" label="Client name" variant="outlined" density="comfortable"
-                      color="primary" required :error="Boolean(fieldErrors.customerName)"
-                      :error-messages="fieldErrors.customerName ? [fieldErrors.customerName] : []" />
+                    <VTextField 
+                      v-model="form.customerName" 
+                      label="Client name" 
+                      variant="outlined" 
+                      density="comfortable"
+                      color="primary" 
+                      required 
+                      :error="Boolean(fieldErrors.customerName)"
+                      :error-messages="fieldErrors.customerName ? [fieldErrors.customerName] : []"
+                    />
                   </VCol>
                   <VCol cols="12" md="6">
-                    <VTextField v-model="form.customerEmail" type="email" label="Client email" variant="outlined"
-                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.customerEmail)"
-                      :error-messages="fieldErrors.customerEmail ? [fieldErrors.customerEmail] : []" />
+                    <VTextField 
+                      v-model="form.customerEmail" 
+                      type="email" 
+                      label="Client email" 
+                      variant="outlined"
+                      density="comfortable" 
+                      color="primary" 
+                      required 
+                      :error="Boolean(fieldErrors.customerEmail)"
+                      :error-messages="fieldErrors.customerEmail ? [fieldErrors.customerEmail] : []"
+                    />
                   </VCol>
                   <VCol cols="12">
-                    <VTextarea v-model="form.customerAddress" label="Client address" rows="3" auto-grow
-                      variant="outlined" density="comfortable" color="primary" placeholder="Street, City, Country" />
+                    <VTextarea 
+                      v-model="form.customerAddress" 
+                      label="Client address" 
+                      rows="3" 
+                      auto-grow
+                      variant="outlined" 
+                      density="comfortable" 
+                      color="primary" 
+                      placeholder="Street, City, Country"
+                    />
                   </VCol>
                 </VRow>
         </section>
@@ -129,21 +201,41 @@
                     </VBtn>
             </div>
                   <VRow dense>
-                    <VCol cols="12" md="3">
-                      <VTextField v-model="carpetDefaults.sizeLabel" label="Label" variant="outlined"
-                        density="comfortable" color="primary" placeholder="8x10" />
+                    <VCol cols="12" md="4">
+                      <VTextField 
+                        v-model.number="carpetDefaults.length" 
+                        type="number" 
+                        min="0" 
+                        step="0.01"
+                        label="Length (cm)" 
+                        variant="outlined" 
+                        density="comfortable" 
+                        color="primary" 
+                        placeholder="250"
+                      />
+                    </VCol>
+                    <VCol cols="12" md="4">
+                      <VTextField 
+                        v-model.number="carpetDefaults.width" 
+                        type="number" 
+                        min="0" 
+                        step="0.01"
+                        label="Width (cm)" 
+                        variant="outlined" 
+                        density="comfortable" 
+                        color="primary" 
+                        placeholder="170"
+                      />
                     </VCol>
                     <VCol cols="12" md="3">
-                      <VTextField v-model.number="carpetDefaults.length" type="number" min="0" step="0.01"
-                        label="Length (m)" variant="outlined" density="comfortable" color="primary" placeholder="2.5" />
-                    </VCol>
-                    <VCol cols="12" md="3">
-                      <VTextField v-model.number="carpetDefaults.width" type="number" min="0" step="0.01"
-                        label="Width (m)" variant="outlined" density="comfortable" color="primary" placeholder="1.7" />
-                    </VCol>
-                    <VCol cols="12" md="3">
-                      <VTextField v-model="carpetDefaults.origin" label="Origin" variant="outlined"
-                        density="comfortable" color="primary" placeholder="Persian" />
+                      <VTextField 
+                        v-model="carpetDefaults.origin" 
+                        label="Origin" 
+                        variant="outlined"
+                        density="comfortable" 
+                        color="primary" 
+                        placeholder="Persian"
+                      />
                     </VCol>
                   </VRow>
                 </section>
@@ -181,66 +273,141 @@
                       <VCardText class="tw-space-y-4">
                         <div class="tw-flex tw-flex-wrap tw-items-start tw-gap-4">
                           <div class="tw-flex-1">
-                            <VTextField v-model="item.productName" label="Item name" variant="outlined"
-                              density="comfortable" color="primary" required
-                              :error="Boolean(fieldErrors.lineItems[index]?.productName)" :error-messages="fieldErrors.lineItems[index]?.productName
+                            <VTextField 
+                              v-model="item.productName" 
+                              label="Item name" 
+                              variant="outlined"
+                              density="comfortable" 
+                              color="primary" 
+                              required
+                              :error="Boolean(fieldErrors.lineItems[index]?.productName)" 
+                              :error-messages="fieldErrors.lineItems[index]?.productName
                                 ? [fieldErrors.lineItems[index]?.productName]
-                                : []
-                                " />
+                                : []"
+                            />
                   </div>
                           <VBtn variant="text" color="error" class="tw-self-start" @click="removeItem(index)">
                             Remove
                           </VBtn>
                 </div>
 
-                        <VTextarea v-model="item.description" label="Description" rows="2" auto-grow variant="outlined"
-                          density="comfortable" color="primary" placeholder="Describe materials, weave, or condition" />
+                        <VTextarea 
+                          v-model="item.description" 
+                          label="Description" 
+                          rows="2" 
+                          auto-grow 
+                          variant="outlined"
+                          density="comfortable" 
+                          color="primary" 
+                          placeholder="Describe materials, weave, or condition"
+                        />
 
                         <VRow dense>
                           <VCol cols="12" md="3">
-                            <VTextField v-model.number="item.quantity" type="number" min="1" label="Quantity"
-                              variant="outlined" density="comfortable" color="primary" required
-                              :error="Boolean(fieldErrors.lineItems[index]?.quantity)" :error-messages="fieldErrors.lineItems[index]?.quantity
+                            <VTextField 
+                              v-model.number="item.quantity" 
+                              type="number" 
+                              min="1" 
+                              label="Quantity"
+                              variant="outlined" 
+                              density="comfortable" 
+                              color="primary" 
+                              required
+                              :error="Boolean(fieldErrors.lineItems[index]?.quantity)" 
+                              :error-messages="fieldErrors.lineItems[index]?.quantity
                                 ? [fieldErrors.lineItems[index]?.quantity]
-                                : []
-                                " />
+                                : []"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField v-model.number="item.price" type="number" min="0" step="0.01" label="Unit price"
-                              variant="outlined" density="comfortable" color="primary" required
-                              :error="Boolean(fieldErrors.lineItems[index]?.price)" :error-messages="fieldErrors.lineItems[index]?.price
+                            <VTextField 
+                              v-model.number="item.price" 
+                              type="number" 
+                              min="0" 
+                              step="0.01" 
+                              label="Price per m²"
+                              variant="outlined" 
+                              density="comfortable" 
+                              color="primary" 
+                              required
+                              :error="Boolean(fieldErrors.lineItems[index]?.price)" 
+                              :error-messages="fieldErrors.lineItems[index]?.price
                                 ? [fieldErrors.lineItems[index]?.price]
-                                : []
-                                " />
+                                : []"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField v-model="item.sizeLabel" label="Size label" variant="outlined"
-                              density="comfortable" color="primary" :placeholder="carpetDefaults.sizeLabel || '8x10'" />
+                            <VTextField 
+                              v-model="item.productId" 
+                              label="Serial Number" 
+                              variant="outlined"
+                              density="comfortable" 
+                              color="primary" 
+                              placeholder="Product ID"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField v-model="item.origin" label="Origin" variant="outlined" density="comfortable"
-                              color="primary" :placeholder="carpetDefaults.origin || 'Persian'" />
+                            <VTextField 
+                              v-model="item.origin" 
+                              label="Origin" 
+                              variant="outlined" 
+                              density="comfortable"
+                              color="primary" 
+                              :placeholder="carpetDefaults.origin || 'Persian'"
+                            />
                           </VCol>
                         </VRow>
 
                         <VRow dense>
                           <VCol cols="12" md="3">
-                            <VTextField v-model.number="item.length" type="number" min="0" step="0.01"
-                              label="Length (m)" variant="outlined" density="comfortable" color="primary"
-                              @blur="recalculateItemTotals(item)" />
+                            <VTextField 
+                              v-model.number="item.length" 
+                              type="number" 
+                              min="0" 
+                              step="0.01"
+                              label="Length (cm)" 
+                              variant="outlined" 
+                              density="comfortable" 
+                              color="primary"
+                              @blur="recalculateItemTotals(item)"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField v-model.number="item.width" type="number" min="0" step="0.01" label="Width (m)"
-                              variant="outlined" density="comfortable" color="primary"
-                              @blur="recalculateItemTotals(item)" />
+                            <VTextField 
+                              v-model.number="item.width" 
+                              type="number" 
+                              min="0" 
+                              step="0.01" 
+                              label="Width (cm)"
+                              variant="outlined" 
+                              density="comfortable" 
+                              color="primary"
+                              @blur="recalculateItemTotals(item)"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField :value="formatArea(item)" label="Area (m²)" variant="outlined"
-                              density="comfortable" color="primary" readonly />
+                            <VTextField 
+                              :model-value="formatArea(item) || '0.00'" 
+                              label="Area (m²)" 
+                              variant="outlined"
+                              density="comfortable" 
+                              color="primary" 
+                              readonly
+                              persistent-hint
+                              :hint="item.area ? `Area: ${item.area.toFixed(4)} m²` : 'Calculated area'"
+                            />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField :value="formatCurrency(lineTotal(item), form.currency)" label="Line total"
-                              variant="outlined" density="comfortable" color="primary" readonly />
+                            <VTextField 
+                              :model-value="formatCurrency(lineTotal(item), form.currency) || formatCurrency(0, form.currency)" 
+                              label="Line total"
+                              variant="outlined"
+                              density="comfortable" 
+                              color="primary" 
+                              readonly
+                              persistent-hint
+                              :hint="`Total: ${formatCurrency(lineTotal(item), form.currency)}`"
+                            />
                           </VCol>
                         </VRow>
                       </VCardText>
@@ -259,14 +426,27 @@
                   </div>
                   <VRow dense>
                     <VCol cols="12" md="6">
-                      <VSelect v-model="form.discountType" :items="discountTypeItems" label="Discount type"
-                        variant="outlined" density="comfortable" color="primary" />
+                      <VSelect 
+                        v-model="form.discountType" 
+                        :items="discountTypeItems" 
+                        label="Discount type"
+                        variant="outlined" 
+                        density="comfortable" 
+                        color="primary"
+                      />
                     </VCol>
                     <VCol cols="12" md="6">
-                      <VTextField v-model.number="form.discount" type="number" min="0" step="0.01"
-                        :label="form.discountType === 'amount' ? 'Value (fixed)' : 'Value (%)'" variant="outlined"
-                        density="comfortable" color="primary"
-                        :placeholder="form.discountType === 'amount' ? '0.00' : '0%'" />
+                      <VTextField 
+                        v-model.number="form.discount" 
+                        type="number" 
+                        min="0" 
+                        step="0.01"
+                        :label="form.discountType === 'amount' ? 'Value (fixed)' : 'Value (%)'" 
+                        variant="outlined"
+                        density="comfortable" 
+                        color="primary"
+                        :placeholder="form.discountType === 'amount' ? '0.00' : '0%'"
+                      />
                     </VCol>
                   </VRow>
         </section>
@@ -807,6 +987,17 @@ onMounted(async () => {
     await loadInvoiceForEdit()
   } else {
     ensureLineItemErrors()
+    // Auto-generate invoice number
+    try {
+      const response = await $fetch<{ invoiceNumber: string }>('/api/invoices/next-number')
+      if (response.invoiceNumber) {
+        form.invoiceNumber = response.invoiceNumber
+      }
+    } catch (error) {
+      console.error('Failed to fetch next invoice number:', error)
+      // Fallback to random number if API fails
+      form.invoiceNumber = `INV-${Math.floor(Math.random() * 9000 + 1000)}`
+    }
   }
 })
 
@@ -1044,7 +1235,6 @@ function addProductToInvoice(product: any, quantity = 1) {
         length: carpetDefaults.length ?? null,
         width: carpetDefaults.width ?? null
       }),
-      sizeLabel: carpetDefaults.sizeLabel || undefined,
       length: carpetDefaults.length ?? undefined,
       width: carpetDefaults.width ?? undefined,
       origin: carpetDefaults.origin || undefined
@@ -1089,7 +1279,6 @@ function addEmptyItem() {
       length: carpetDefaults.length ?? null,
       width: carpetDefaults.width ?? null
     }),
-    sizeLabel: carpetDefaults.sizeLabel || undefined,
     length: carpetDefaults.length ?? undefined,
     width: carpetDefaults.width ?? undefined,
     origin: carpetDefaults.origin || undefined
@@ -1110,11 +1299,14 @@ function removeItem(index: number) {
   }
 }
 
-function calculateArea(item: Pick<InvoiceItem, 'length' | 'width'>) {
+function calculateArea(item: Pick<InvoiceItem, 'length' | 'width'>): number | null {
+  // Length and width are in cm, convert to m² (divide by 10000: 100cm * 100cm = 10000 cm² = 1 m²)
   const length = Number(item.length) || 0
   const width = Number(item.width) || 0
-  const area = length * width
-  return area > 0 ? parseFloat(area.toFixed(2)) : null
+  if (length <= 0 || width <= 0) return null
+  const areaCm2 = length * width
+  const areaM2 = areaCm2 / 10000 // Convert cm² to m²
+  return parseFloat(areaM2.toFixed(4))
 }
 
 function lineTotal(item: InvoiceItem) {
@@ -1252,6 +1444,7 @@ function buildPreviewHtml(payload: {
     quantity: number
     price: number
     total: number
+    productId?: string
     sizeLabel?: string
     length?: number | null
     width?: number | null
@@ -1329,7 +1522,7 @@ function buildPreviewHtml(payload: {
               <td>
                 <div style="font-weight:600;color:#0f172a;">${item.productName}</div>
                 ${item.description ? `<div style="color:#94a3b8;font-size:12px;">${item.description}</div>` : ''}
-                <div style="color:#cbd5f5;font-size:12px;">${item.sizeLabel || '-'} • ${item.origin || '-'}</div>
+                <div style="color:#cbd5f5;font-size:12px;">${item.productId ? `Serial: ${item.productId}` : '-'}${item.origin ? ` • ${item.origin}` : ''}</div>
               </td>
               <td>${item.quantity}</td>
               <td>${formatCurrency(item.price)}</td>
@@ -1411,7 +1604,6 @@ async function submitInvoice(sendEmail: boolean) {
         quantity: item.quantity,
         price: item.price,
         total: lineTotal(item),
-        sizeLabel: item.sizeLabel,
         length: item.length,
         width: item.width,
         area: item.area,
@@ -1489,7 +1681,7 @@ function prefillDemo() {
 
 function resetCarpetDefaults() {
   debugLog('Resetting carpet defaults', { before: { ...carpetDefaults } })
-  carpetDefaults.sizeLabel = ''
+  // Removed sizeLabel - using productId as serial number instead
   carpetDefaults.length = null
   carpetDefaults.width = null
   carpetDefaults.origin = ''

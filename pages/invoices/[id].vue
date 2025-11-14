@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-max-w-4xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-py-8">
+  <div class="tw-max-w-7xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-py-8">
     <div v-if="loading" class="tw-text-center tw-py-12">
       <p class="tw-text-gray-500">Loading invoice...</p>
     </div>
@@ -25,9 +25,9 @@
           >
             Mark as Paid
           </VBtn>
-          <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true">
+          <!-- <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true">
             Record Payment
-          </VBtn>
+          </VBtn> -->
         </div>
       </div>
 
@@ -57,21 +57,33 @@
           </div>
         </div>
 
-        <div class="tw-border-t tw-border-gray-200 tw-pt-6">
-          <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
+        <div class="tw-border-t tw-border-gray-200 tw-pt-6 tw-overflow-x-auto">
+          <table class="tw-min-w-full tw-divide-y tw-divide-gray-200 tw-w-full">
             <thead class="tw-bg-gray-50">
               <tr>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Description
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
+                  Serial Number
+                </th>
+                <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
+                  Length (cm)
+                </th>
+                <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
+                  Width (cm)
+                </th>
+                <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Area (m²)
+                </th>
+                <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
+                  Origin
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Quantity
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
-                  Rate
+                  Price per m²
                 </th>
                 <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-gray-500 tw-uppercase tw-tracking-wider">
                   Total
@@ -83,15 +95,21 @@
                 <td class="tw-px-6 tw-py-4 tw-align-top">
                   <div class="tw-font-medium tw-text-gray-900">{{ item.productName }}</div>
                   <div v-if="item.description" class="tw-text-xs tw-text-gray-500 tw-mt-1">{{ item.description }}</div>
-                  <div class="tw-text-xs tw-text-gray-400 tw-mt-1">
-                    <span v-if="item.sizeLabel">{{ item.sizeLabel }}</span>
-                    <span v-if="item.length">{{ item.length }}m</span>
-                    <span v-if="item.width">× {{ item.width }}m</span>
-                    <span v-if="item.origin">• {{ item.origin }}</span>
-                  </div>
+                </td>
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ item.productId || '—' }}
+                </td>
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ item.length ? `${item.length} cm` : '—' }}
+                </td>
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ item.width ? `${item.width} cm` : '—' }}
                 </td>
                 <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
                   {{ formatArea(item.area) }}
+                </td>
+                <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
+                  {{ item.origin || '—' }}
                 </td>
                 <td class="tw-px-6 tw-py-4 tw-text-sm tw-text-gray-600">
                   {{ item.quantity }}
@@ -157,9 +175,9 @@
               Total Paid: {{ formatCurrency(totalPaid) }} · Outstanding: {{ formatCurrency(outstanding) }}
             </p>
           </div>
-          <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true" prepend-icon="mdi-plus">
+          <!-- <VBtn color="secondary" variant="tonal" @click="showPaymentModal = true" prepend-icon="mdi-plus">
             Add Payment
-          </VBtn>
+          </VBtn> -->
         </div>
         <div v-if="invoice.payments?.length" class="tw-space-y-3">
           <VCard

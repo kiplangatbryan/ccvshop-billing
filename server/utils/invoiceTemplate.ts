@@ -111,9 +111,9 @@ export function generateInvoiceHtml(invoice: Invoice, company: CompanyInfo = { n
             <div style="font-weight:600;color:#0f172a;">${item.productName}</div>
           </td>
           <td>
-            <div>${item.sizeLabel || '-'}</div>
+            <div>${item.productId ? `Serial: ${item.productId}` : '-'}</div>
             <div style="color:#94a3b8;font-size:12px;">
-              ${item.length ? `${item.length}m` : ''}${item.width ? ` × ${item.width}m` : ''}${item.origin ? ` • ${item.origin}` : ''}
+              ${item.length ? `${item.length}cm` : ''}${item.width ? ` × ${item.width}cm` : ''}${item.origin ? ` • ${item.origin}` : ''}
             </div>
           </td>
           <td>${item.quantity}</td>
@@ -158,7 +158,7 @@ export function generateInvoiceHtml(invoice: Invoice, company: CompanyInfo = { n
 export function generateInvoiceText(invoice: Invoice, company: CompanyInfo = { name: 'Zargar Invoice' }) {
   const items = invoice.items
     .map((item) => {
-      const size = [item.sizeLabel, item.length ? `${item.length}m` : '', item.width ? `${item.width}m` : '', item.origin]
+      const size = [item.productId ? `Serial: ${item.productId}` : '', item.length ? `${item.length}cm` : '', item.width ? `${item.width}cm` : '', item.origin]
         .filter(Boolean)
         .join(' / ')
 

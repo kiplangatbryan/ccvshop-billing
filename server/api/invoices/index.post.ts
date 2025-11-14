@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     })
     
     const {
-      invoiceNumber,
+      invoiceNumber: providedInvoiceNumber,
       customerName,
       customerEmail,
       items,
@@ -33,7 +33,39 @@ export default defineEventHandler(async (event) => {
       discountAmount: discountAmountInput
     } = body
 
-    if (!invoiceNumber || !customerName || !customerEmail || !items || items.length === 0) {
+    // Auto-generate invoice number if not provided
+    let invoiceNumber = providedInvoiceNumber
+    if (!invoiceNumber || invoiceNumber.trim() === '') {
+      const invoices = await getCollection<Invoice>('invoices')
+      
+      // Get all invoices for this user to find the highest number
+      const allInvoices = await invoices
+        .find({ createdBy: user.userId })
+        .toArray()
+      
+      let maxNumber = 0
+      for (const inv of allInvoices) {
+        if (inv.invoiceNumber) {
+          // Extract number from invoice number (e.g., "INV-000123" -> 123)
+          const match = inv.invoiceNumber.match(/(\d+)$/)
+          if (match) {
+            const num = parseInt(match[1], 10)
+            if (num > maxNumber) {
+              maxNumber = num
+            }
+          }
+        }
+      }
+      
+      // Next number is max + 1, or 1 if no invoices exist
+      const nextNumber = maxNumber + 1
+      
+      // Format with prefix and padding
+      invoiceNumber = `INV-${String(nextNumber).padStart(6, '0')}`
+      log.info('Auto-generated invoice number', { invoiceNumber, nextNumber })
+    }
+
+    if (!customerName || !customerEmail || !items || items.length === 0) {
       throw createError({
         statusCode: 400,
         message: 'Missing required fields'
