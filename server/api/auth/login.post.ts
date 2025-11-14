@@ -32,12 +32,21 @@ export default defineEventHandler(async (event) => {
 
     const token = generateToken(user)
     
-    setCookie(event, 'auth-token', token, {
+    // Set cookie with proper options
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    })
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    }
+    
+    setCookie(event, 'auth-token', token, cookieOptions)
+    
+    // Debug: Log cookie setting
+    console.log('=== Login: Setting cookie ===')
+    console.log('Cookie options:', cookieOptions)
+    console.log('Token length:', token.length)
 
     return {
       success: true,

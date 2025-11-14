@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  // Skip auth for login/register endpoints
-  if (url.startsWith('/api/auth/login') || url.startsWith('/api/auth/register')) {
+  // Skip auth for login/register/me endpoints
+  if (url.startsWith('/api/auth/login') || url.startsWith('/api/auth/register') || url.startsWith('/api/auth/me')) {
     return
   }
 

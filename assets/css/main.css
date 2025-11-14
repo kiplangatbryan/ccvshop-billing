@@ -53,6 +53,9 @@ a:hover {
   padding: 24px;
 }
 
+.v-stepper-window {
+  margin: 0 !important;
+}
 /* Make card-shell work with VCard components */
 .v-card.card-shell,
 .v-sheet.card-shell {

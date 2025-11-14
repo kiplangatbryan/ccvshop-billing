@@ -9,22 +9,11 @@
         <p class="tw-text-gray-500 tw-mt-2">{{ headerSubtitle }}</p>
       </div>
       <div class="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
-        <VBtn
-          v-if="!isEdit"
-          variant="text"
-          color="primary"
-          @click="prefillDemo"
-          prepend-icon="mdi-clipboard-play-outline"
-        >
+        <VBtn v-if="!isEdit" variant="text" color="primary" @click="prefillDemo"
+          prepend-icon="mdi-clipboard-play-outline">
           Load sample data
         </VBtn>
-        <VBtn
-          v-else
-          variant="tonal"
-          color="secondary"
-          @click="goToInvoice"
-          prepend-icon="mdi-open-in-new"
-        >
+        <VBtn v-else variant="tonal" color="secondary" @click="goToInvoice" prepend-icon="mdi-open-in-new">
           View invoice
         </VBtn>
       </div>
@@ -42,211 +31,109 @@
           <VStepperWindow class="tw-pt-6 tw-space-y-6">
             <VStepperWindowItem value="0">
               <section class="card-shell tw-space-y-5">
-          <div>
-            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoice information</h2>
-            <p class="tw-text-sm tw-text-gray-500">Reference details shown on the invoice header.</p>
-          </div>
+                <div>
+                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Invoice information</h2>
+                  <p class="tw-text-sm tw-text-gray-500">Reference details shown on the invoice header.</p>
+                </div>
                 <VRow dense>
                   <VCol cols="12" md="4">
-                    <VTextField 
-                      v-model="form.invoiceNumber" 
-                      label="Invoice number" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary" 
-                      required 
-                      :error="Boolean(fieldErrors.invoiceNumber)"
-                      :error-messages="fieldErrors.invoiceNumber ? [fieldErrors.invoiceNumber] : []"
-                      :readonly="!isEdit"
-                      hint="Auto-generated invoice number"
-                      persistent-hint
-                    />
+                    <VTextField v-model="form.invoiceNumber" label="Invoice number" variant="outlined"
+                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.invoiceNumber)"
+                      :error-messages="fieldErrors.invoiceNumber ? [fieldErrors.invoiceNumber] : []" :readonly="!isEdit"
+                      hint="Auto-generated invoice number" persistent-hint />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VSelect 
-                      v-model="form.currency" 
-                      :items="currencyItems" 
-                      label="Currency" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary"
-                    />
+                    <VSelect v-model="form.currency" :items="currencyItems" label="Currency" variant="outlined"
+                      density="comfortable" color="primary" />
                   </VCol>
                   <VCol v-if="isEdit" cols="12" md="4">
-                    <VSelect
-                      v-model="form.status"
-                      :items="statusOptions"
-                      item-title="title"
-                      item-value="value"
-                      label="Status"
-                      variant="outlined"
-                      density="comfortable"
-                      color="primary"
-                    />
+                    <VSelect v-model="form.status" :items="statusOptions" item-title="title" item-value="value"
+                      label="Status" variant="outlined" density="comfortable" color="primary" />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField 
-                      v-model.number="form.taxRate" 
-                      type="number" 
-                      min="0" 
-                      step="0.1" 
-                      label="Tax rate (%)"
-                      variant="outlined" 
-                      density="comfortable" 
-                      color="primary"
-                    />
+                    <VTextField v-model.number="form.taxRate" type="number" min="0" step="0.1" label="Tax rate (%)"
+                      variant="outlined" density="comfortable" color="primary" />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField 
-                      v-model="form.invoiceDate" 
-                      type="date" 
-                      label="Invoice date" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary"
-                    />
+                    <VTextField v-model="form.invoiceDate" type="date" label="Invoice date" variant="outlined"
+                      density="comfortable" color="primary" />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField 
-                      v-model="form.dueDate" 
-                      type="date" 
-                      label="Due date" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary"
-                    />
+                    <VTextField v-model="form.dueDate" type="date" label="Due date" variant="outlined"
+                      density="comfortable" color="primary" />
                   </VCol>
                   <VCol cols="12" md="4">
-                    <VTextField 
-                      v-model="form.terms" 
-                      label="Payment terms" 
-                      placeholder="Net 30" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary"
-                    />
+                    <VTextField v-model="form.terms" label="Payment terms" placeholder="Net 30" variant="outlined"
+                      density="comfortable" color="primary" />
                   </VCol>
                 </VRow>
-                <VTextarea 
-                  v-model="form.memo" 
-                  label="Memo (visible to client)" 
-                  rows="3" 
-                  auto-grow 
-                  variant="outlined"
-                  density="comfortable" 
-                  color="primary"
-                  placeholder="Thank you for your business. Please include invoice number with payment."
-                />
-        </section>
+                <VTextarea v-model="form.memo" label="Memo (visible to client)" rows="3" auto-grow variant="outlined"
+                  density="comfortable" color="primary"
+                  placeholder="Thank you for your business. Please include invoice number with payment." />
+              </section>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="1">
               <section class="card-shell tw-space-y-5">
-          <div>
-            <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Bill to</h2>
-            <p class="tw-text-sm tw-text-gray-500">Specify who will receive this invoice.</p>
-          </div>
+                <div>
+                  <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Bill to</h2>
+                  <p class="tw-text-sm tw-text-gray-500">Specify who will receive this invoice.</p>
+                </div>
                 <VRow dense>
                   <VCol cols="12" md="6">
-                    <VTextField 
-                      v-model="form.customerName" 
-                      label="Client name" 
-                      variant="outlined" 
-                      density="comfortable"
-                      color="primary" 
-                      required 
-                      :error="Boolean(fieldErrors.customerName)"
-                      :error-messages="fieldErrors.customerName ? [fieldErrors.customerName] : []"
-                    />
+                    <VTextField v-model="form.customerName" label="Client name" variant="outlined" density="comfortable"
+                      color="primary" required :error="Boolean(fieldErrors.customerName)"
+                      :error-messages="fieldErrors.customerName ? [fieldErrors.customerName] : []" />
                   </VCol>
                   <VCol cols="12" md="6">
-                    <VTextField 
-                      v-model="form.customerEmail" 
-                      type="email" 
-                      label="Client email" 
-                      variant="outlined"
-                      density="comfortable" 
-                      color="primary" 
-                      required 
-                      :error="Boolean(fieldErrors.customerEmail)"
-                      :error-messages="fieldErrors.customerEmail ? [fieldErrors.customerEmail] : []"
-                    />
+                    <VTextField v-model="form.customerEmail" type="email" label="Client email" variant="outlined"
+                      density="comfortable" color="primary" required :error="Boolean(fieldErrors.customerEmail)"
+                      :error-messages="fieldErrors.customerEmail ? [fieldErrors.customerEmail] : []" />
                   </VCol>
                   <VCol cols="12">
-                    <VTextarea 
-                      v-model="form.customerAddress" 
-                      label="Client address" 
-                      rows="3" 
-                      auto-grow
-                      variant="outlined" 
-                      density="comfortable" 
-                      color="primary" 
-                      placeholder="Street, City, Country"
-                    />
+                    <VTextarea v-model="form.customerAddress" label="Client address" rows="3" auto-grow
+                      variant="outlined" density="comfortable" color="primary" placeholder="Street, City, Country" />
                   </VCol>
                 </VRow>
-        </section>
+              </section>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="2">
               <div class="tw-space-y-6">
                 <section class="card-shell tw-space-y-5">
                   <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-              <div>
+                    <div>
                       <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Carpet defaults</h2>
                       <p class="tw-text-sm tw-text-gray-500">Prefill metadata applied to newly added line items.</p>
-              </div>
+                    </div>
                     <VBtn variant="text" color="secondary" @click="resetCarpetDefaults">
                       Reset
                     </VBtn>
-            </div>
+                  </div>
                   <VRow dense>
                     <VCol cols="12" md="4">
-                      <VTextField 
-                        v-model.number="carpetDefaults.length" 
-                        type="number" 
-                        min="0" 
-                        step="0.01"
-                        label="Length (cm)" 
-                        variant="outlined" 
-                        density="comfortable" 
-                        color="primary" 
-                        placeholder="250"
-                      />
+                      <VTextField v-model.number="carpetDefaults.length" type="number" min="0" step="0.01"
+                        label="Length (cm)" variant="outlined" density="comfortable" color="primary"
+                        placeholder="250" />
                     </VCol>
                     <VCol cols="12" md="4">
-                      <VTextField 
-                        v-model.number="carpetDefaults.width" 
-                        type="number" 
-                        min="0" 
-                        step="0.01"
-                        label="Width (cm)" 
-                        variant="outlined" 
-                        density="comfortable" 
-                        color="primary" 
-                        placeholder="170"
-                      />
+                      <VTextField v-model.number="carpetDefaults.width" type="number" min="0" step="0.01"
+                        label="Width (cm)" variant="outlined" density="comfortable" color="primary" placeholder="170" />
                     </VCol>
                     <VCol cols="12" md="3">
-                      <VTextField 
-                        v-model="carpetDefaults.origin" 
-                        label="Origin" 
-                        variant="outlined"
-                        density="comfortable" 
-                        color="primary" 
-                        placeholder="Persian"
-                      />
+                      <VTextField v-model="carpetDefaults.origin" label="Origin" variant="outlined"
+                        density="comfortable" color="primary" placeholder="Persian" />
                     </VCol>
                   </VRow>
                 </section>
 
                 <section class="card-shell tw-space-y-6">
                   <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-      <div>
+                    <div>
                       <h2 class="tw-text-lg tw-font-semibold tw-text-gray-900">Line items</h2>
                       <p class="tw-text-sm tw-text-gray-500">Capture quantity, pricing, and carpet metadata per item.
                       </p>
-              </div>
+                    </div>
                     <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                       <VBtn variant="text" color="secondary" @click="showProductSelector = true">
                         Import from CCV Shop
@@ -254,8 +141,8 @@
                       <VBtn variant="tonal" color="primary" @click="addEmptyItem">
                         + Add custom item
                       </VBtn>
-              </div>
-        </div>
+                    </div>
+                  </div>
 
                   <VAlert v-if="fieldErrors.items" type="error" variant="tonal" density="comfortable"
                     class="tw-rounded-2xl">
@@ -264,8 +151,8 @@
 
                   <div v-if="form.items.length === 0"
                     class="tw-border-2 tw-border-dashed tw-border-gray-200 tw-rounded-2xl tw-py-12 tw-text-center tw-text-sm tw-text-gray-500">
-              No items yet. Import from CCV Shop or add a custom entry.
-        </div>
+                    No items yet. Import from CCV Shop or add a custom entry.
+                  </div>
 
                   <div v-else class="tw-space-y-4">
                     <VCard v-for="(item, index) in form.items" :key="index" variant="outlined"
@@ -273,148 +160,73 @@
                       <VCardText class="tw-space-y-4">
                         <div class="tw-flex tw-flex-wrap tw-items-start tw-gap-4">
                           <div class="tw-flex-1">
-                            <VTextField 
-                              v-model="item.productName" 
-                              label="Item name" 
-                              variant="outlined"
-                              density="comfortable" 
-                              color="primary" 
-                              required
-                              :error="Boolean(fieldErrors.lineItems[index]?.productName)" 
-                              :error-messages="fieldErrors.lineItems[index]?.productName
+                            <VTextField v-model="item.productName" label="Item name" variant="outlined"
+                              density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.productName)" :error-messages="fieldErrors.lineItems[index]?.productName
                                 ? [fieldErrors.lineItems[index]?.productName]
-                                : []"
-                            />
-                  </div>
+                                : []" />
+                          </div>
                           <VBtn variant="text" color="error" class="tw-self-start" @click="removeItem(index)">
                             Remove
                           </VBtn>
-                </div>
+                        </div>
 
-                        <VTextarea 
-                          v-model="item.description" 
-                          label="Description" 
-                          rows="2" 
-                          auto-grow 
-                          variant="outlined"
-                          density="comfortable" 
-                          color="primary" 
-                          placeholder="Describe materials, weave, or condition"
-                        />
+                        <VTextarea v-model="item.description" label="Description" rows="2" auto-grow variant="outlined"
+                          density="comfortable" color="primary" placeholder="Describe materials, weave, or condition" />
 
                         <VRow dense>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model.number="item.quantity" 
-                              type="number" 
-                              min="1" 
-                              label="Quantity"
-                              variant="outlined" 
-                              density="comfortable" 
-                              color="primary" 
-                              required
-                              :error="Boolean(fieldErrors.lineItems[index]?.quantity)" 
-                              :error-messages="fieldErrors.lineItems[index]?.quantity
+                            <VTextField v-model.number="item.quantity" type="number" min="1" label="Quantity"
+                              variant="outlined" density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.quantity)" :error-messages="fieldErrors.lineItems[index]?.quantity
                                 ? [fieldErrors.lineItems[index]?.quantity]
-                                : []"
-                            />
+                                : []" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model.number="item.price" 
-                              type="number" 
-                              min="0" 
-                              step="0.01" 
-                              label="Price per m²"
-                              variant="outlined" 
-                              density="comfortable" 
-                              color="primary" 
-                              required
-                              :error="Boolean(fieldErrors.lineItems[index]?.price)" 
-                              :error-messages="fieldErrors.lineItems[index]?.price
+                            <VTextField v-model.number="item.price" type="number" min="0" step="0.01"
+                              label="Price per m²" variant="outlined" density="comfortable" color="primary" required
+                              :error="Boolean(fieldErrors.lineItems[index]?.price)" :error-messages="fieldErrors.lineItems[index]?.price
                                 ? [fieldErrors.lineItems[index]?.price]
-                                : []"
-                            />
+                                : []" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model="item.productId" 
-                              label="Serial Number" 
-                              variant="outlined"
-                              density="comfortable" 
-                              color="primary" 
-                              placeholder="Product ID"
-                            />
+                            <VTextField v-model="item.productId" label="Serial Number" variant="outlined"
+                              density="comfortable" color="primary" placeholder="Product ID" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model="item.origin" 
-                              label="Origin" 
-                              variant="outlined" 
-                              density="comfortable"
-                              color="primary" 
-                              :placeholder="carpetDefaults.origin || 'Persian'"
-                            />
+                            <VTextField v-model="item.origin" label="Origin" variant="outlined" density="comfortable"
+                              color="primary" :placeholder="carpetDefaults.origin || 'Persian'" />
                           </VCol>
                         </VRow>
 
                         <VRow dense>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model.number="item.length" 
-                              type="number" 
-                              min="0" 
-                              step="0.01"
-                              label="Length (cm)" 
-                              variant="outlined" 
-                              density="comfortable" 
-                              color="primary"
-                              @blur="recalculateItemTotals(item)"
-                            />
+                            <VTextField v-model.number="item.length" type="number" min="0" step="0.01"
+                              label="Length (cm)" variant="outlined" density="comfortable" color="primary"
+                              @blur="recalculateItemTotals(item)" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              v-model.number="item.width" 
-                              type="number" 
-                              min="0" 
-                              step="0.01" 
-                              label="Width (cm)"
-                              variant="outlined" 
-                              density="comfortable" 
-                              color="primary"
-                              @blur="recalculateItemTotals(item)"
-                            />
+                            <VTextField v-model.number="item.width" type="number" min="0" step="0.01" label="Width (cm)"
+                              variant="outlined" density="comfortable" color="primary"
+                              @blur="recalculateItemTotals(item)" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              :model-value="formatArea(item) || '0.00'" 
-                              label="Area (m²)" 
-                              variant="outlined"
-                              density="comfortable" 
-                              color="primary" 
-                              readonly
-                              persistent-hint
-                              :hint="item.area ? `Area: ${item.area.toFixed(4)} m²` : 'Calculated area'"
-                            />
+                            <VTextField :model-value="formatArea(item) || '0.00'" label="Area (m²)" variant="outlined"
+                              density="comfortable" color="primary" readonly persistent-hint
+                              :hint="item.area ? `Area: ${item.area.toFixed(4)} m²` : 'Calculated area'" />
                           </VCol>
                           <VCol cols="12" md="3">
-                            <VTextField 
-                              :model-value="formatCurrency(lineTotal(item), form.currency) || formatCurrency(0, form.currency)" 
-                              label="Line total"
-                              variant="outlined"
-                              density="comfortable" 
-                              color="primary" 
-                              readonly
-                              persistent-hint
-                              :hint="`Total: ${formatCurrency(lineTotal(item), form.currency)}`"
-                            />
+                            <VTextField
+                              :model-value="formatCurrency(lineTotal(item), form.currency) || formatCurrency(0, form.currency)"
+                              label="Line total" variant="outlined" density="comfortable" color="primary" readonly
+                              persistent-hint :hint="`Total: ${formatCurrency(lineTotal(item), form.currency)}`" />
                           </VCol>
                         </VRow>
                       </VCardText>
                     </VCard>
-                </div>
-                </section>
                   </div>
+                </section>
+              </div>
             </VStepperWindowItem>
 
             <VStepperWindowItem value="3">
@@ -426,55 +238,42 @@
                   </div>
                   <VRow dense>
                     <VCol cols="12" md="6">
-                      <VSelect 
-                        v-model="form.discountType" 
-                        :items="discountTypeItems" 
-                        label="Discount type"
-                        variant="outlined" 
-                        density="comfortable" 
-                        color="primary"
-                      />
+                      <VSelect v-model="form.discountType" :items="discountTypeItems" label="Discount type"
+                        variant="outlined" density="comfortable" color="primary" />
                     </VCol>
                     <VCol cols="12" md="6">
-                      <VTextField 
-                        v-model.number="form.discount" 
-                        type="number" 
-                        min="0" 
-                        step="0.01"
-                        :label="form.discountType === 'amount' ? 'Value (fixed)' : 'Value (%)'" 
-                        variant="outlined"
-                        density="comfortable" 
-                        color="primary"
-                        :placeholder="form.discountType === 'amount' ? '0.00' : '0%'"
-                      />
+                      <VTextField v-model.number="form.discount" type="number" min="0" step="0.01"
+                        :label="form.discountType === 'amount' ? 'Value (fixed)' : 'Value (%)'" variant="outlined"
+                        density="comfortable" color="primary"
+                        :placeholder="form.discountType === 'amount' ? '0.00' : '0%'" />
                     </VCol>
                   </VRow>
-        </section>
+                </section>
 
                 <section class="card-shell tw-space-y-3">
                   <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
-              <span>Subtotal</span>
-              <span>{{ formatCurrency(subtotal, form.currency) }}</span>
-            </div>
+                    <span>Subtotal</span>
+                    <span>{{ formatCurrency(subtotal, form.currency) }}</span>
+                  </div>
                   <div v-if="form.discountAmount > 0" class="tw-flex tw-items-center tw-justify-between tw-text-sm">
-              <span>Discount</span>
+                    <span>Discount</span>
                     <span class="tw-text-emerald-600">-{{ formatCurrency(form.discountAmount, form.currency) }}</span>
-        </div>
+                  </div>
                   <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-text-gray-600">
-              <span>Tax ({{ form.taxRate }}%)</span>
-              <span>{{ formatCurrency(taxAmount, form.currency) }}</span>
-        </div>
+                    <span>Tax ({{ form.taxRate }}%)</span>
+                    <span>{{ formatCurrency(taxAmount, form.currency) }}</span>
+                  </div>
                   <div
                     class="tw-flex tw-items-center tw-justify-between tw-text-base tw-font-semibold tw-text-gray-900">
-              <span>Total due</span>
-              <span>{{ formatCurrency(total, form.currency) }}</span>
-      </div>
-        </section>
+                    <span>Total due</span>
+                    <span>{{ formatCurrency(total, form.currency) }}</span>
+                  </div>
+                </section>
               </div>
             </VStepperWindowItem>
           </VStepperWindow>
 
-          <VStepperActions class="tw-pt-4">
+          <VStepperActions class="tw-pt-4 tw-mt-5">
             <template #prev>
               <VBtn variant="text" color="primary" @click="prevStep" :disabled="currentStepIndex === 0">
                 Back
@@ -486,20 +285,16 @@
                   <VBtn color="primary" @click="handleNextStep">
                     Next
                   </VBtn>
-          </template>
-          <template v-else>
+                </template>
+                <template v-else>
                   <div class="tw-flex tw-flex-wrap tw-justify-end tw-gap-2">
-                    <VBtn
-                      color="primary"
-                      :loading="submitting"
-                      @click="submitInvoice(false)"
-                      :disabled="submitting || disabledSubmit"
-                    >
+                    <VBtn color="primary" :loading="submitting" @click="submitInvoice(false)"
+                      :disabled="submitting || disabledSubmit">
                       Save
                     </VBtn>
                   </div>
-          </template>
-      </div>
+                </template>
+              </div>
             </template>
           </VStepperActions>
         </VStepper>
@@ -507,16 +302,12 @@
 
       <aside v-if="showPreview" class="tw-w-full">
         <div class="tw-overflow-hidden tw-h-full">
-          <iframe
-            title="Invoice Preview"
-            class="tw-w-full tw-h-[960px]"
-            :src="previewPdfUrl || 'about:blank'"
-            style="background:#ffffff; display:block; border:0;"
-          />
+          <iframe title="Invoice Preview" class="tw-w-full tw-h-[960px]" :src="previewPdfUrl || 'about:blank'"
+            style="background:#ffffff; display:block; border:0;" />
         </div>
       </aside>
     </div>
-    </div>
+  </div>
 
   <VDialog v-model="showProductSelector" max-width="880" transition="dialog-bottom-transition" scrollable>
     <VCard class="tw-rounded-[32px] tw-border tw-border-gray-100 tw-shadow-2xl tw-overflow-hidden">
@@ -536,67 +327,40 @@
       </VCardText>
 
       <VCardText class="tw-px-6 tw-pt-4 tw-pb-6 tw-space-y-4">
-        <VAlert
-          v-if="productsLoaded && products.length === 0 && !loadingProducts"
-          type="info"
-          variant="tonal"
-          color="primary"
-          class="tw-rounded-2xl"
-        >
+        <VAlert v-if="productsLoaded && products.length === 0 && !loadingProducts" type="info" variant="tonal"
+          color="primary" class="tw-rounded-2xl">
           We couldn’t find any products in CCV Shop yet. Add some items to your store and try again.
         </VAlert>
 
-        <VProgressCircular
-          v-else-if="loadingProducts"
-          indeterminate
-          color="primary"
-          class="tw-block tw-mx-auto tw-my-16"
-          size="48"
-          width="4"
-        />
+        <VProgressCircular v-else-if="loadingProducts" indeterminate color="primary"
+          class="tw-block tw-mx-auto tw-my-16" size="48" width="4" />
 
         <div class="tw-space-y-4">
-          <VTextField
-            v-model="productSearch"
-            label="Search by product number or name"
-            variant="outlined"
-            density="comfortable"
-            color="primary"
-            prepend-inner-icon="mdi-magnify"
-            clearable
-            placeholder="Enter product number or name to search"
-            @update:model-value="debouncedProductSearch"
-            class="tw-w-full"
-          />
+          <VTextField v-model="productSearch" label="Search by product number or name" variant="outlined"
+            density="comfortable" color="primary" prepend-inner-icon="mdi-magnify" clearable
+            placeholder="Enter product number or name to search" @update:model-value="debouncedProductSearch"
+            class="tw-w-full" />
 
-          <div v-if="filteredProducts.length === 0 && !loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
+          <div v-if="filteredProducts.length === 0 && !loadingProducts"
+            class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
             <p v-if="productSearch">No products match your search.</p>
             <p v-else>No products available.</p>
           </div>
 
           <div v-else class="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden">
             <VList density="comfortable" class="tw-p-0">
-              <VListItem
-                v-for="product in filteredProducts"
-                :key="product.id"
-                :value="product.id"
-                :active="selectedProductIds.includes(product.id)"
-                @click="toggleProductSelection(product.id)"
-                class="tw-cursor-pointer hover:tw-bg-gray-50"
-              >
+              <VListItem v-for="product in filteredProducts" :key="product.id" :value="product.id"
+                :active="selectedProductIds.includes(product.id)" @click="toggleProductSelection(product.id)"
+                class="tw-cursor-pointer hover:tw-bg-gray-50">
                 <template #prepend>
-                  <VCheckbox
-                    :model-value="selectedProductIds.includes(product.id)"
-                    @click.stop="toggleProductSelection(product.id)"
-                    color="primary"
-                    hide-details
-                  />
+                  <VCheckbox :model-value="selectedProductIds.includes(product.id)"
+                    @click.stop="toggleProductSelection(product.id)" color="primary" hide-details />
                 </template>
-                
+
                 <VListItemTitle class="tw-font-semibold tw-text-gray-900">
                   {{ product.name }}
                 </VListItemTitle>
-                
+
                 <VListItemSubtitle class="tw-mt-1">
                   <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-text-sm">
                     <span class="tw-font-medium tw-text-gray-700">
@@ -608,13 +372,8 @@
                     <span v-if="product.sku" class="tw-text-gray-500">
                       SKU: {{ product.sku }}
                     </span>
-                    <VChip
-                      v-if="product.stock !== undefined"
-                      size="small"
-                      :color="product.stock > 0 ? 'success' : 'warning'"
-                      variant="flat"
-                      class="tw-text-xs"
-                    >
+                    <VChip v-if="product.stock !== undefined" size="small"
+                      :color="product.stock > 0 ? 'success' : 'warning'" variant="flat" class="tw-text-xs">
                       {{ product.stock > 0 ? `${product.stock} in stock` : 'On request' }}
                     </VChip>
                   </div>
@@ -628,13 +387,11 @@
         </div>
       </VCardText>
       <VCardActions class="tw-px-6 tw-py-4 tw-border-t tw-border-gray-100 tw-justify-end">
-        <VBtn
-          color="primary"
-          class="tw-rounded-full tw-px-6 tw-font-semibold"
-          :disabled="!hasSelectedProducts"
-          @click="addSelectedProducts"
-        >
-          {{ hasSelectedProducts ? `Add ${selectedProductIds.length} item${selectedProductIds.length === 1 ? '' : 's'}` : 'Add selected' }}
+        <VBtn color="primary" class="tw-rounded-full tw-px-6 tw-font-semibold" :disabled="!hasSelectedProducts"
+          @click="addSelectedProducts">
+          {{ hasSelectedProducts ? `Add ${selectedProductIds.length} item${selectedProductIds.length === 1 ? '' : 's'}`
+            :
+          'Add selected' }}
         </VBtn>
         <VBtn variant="outlined" color="secondary" class="tw-rounded-full tw-px-6" @click="showProductSelector = false">
           Close
@@ -982,10 +739,10 @@ function debouncedProductSearch() {
   if (searchDebounceTimer.value) {
     clearTimeout(searchDebounceTimer.value)
   }
-  
+
   searchDebounceTimer.value = setTimeout(async () => {
     const searchTerm = productSearch.value.trim()
-    
+
     if (!searchTerm) {
       productSearchByNumber.value = false
       productsFromSearch.value = []
@@ -995,10 +752,10 @@ function debouncedProductSearch() {
       }
       return
     }
-    
+
     // Check if search looks like a product number (numeric or alphanumeric)
     const looksLikeProductNumber = /^[A-Z0-9\-_]+$/i.test(searchTerm)
-    
+
     if (looksLikeProductNumber) {
       // Search by product number via API
       productSearchByNumber.value = true
@@ -1250,8 +1007,8 @@ async function loadInvoiceForEdit() {
       const length = item.length ?? null
       const width = item.width ?? null
       // Calculate area from cm to m² (divide by 10000)
-      const derivedArea = length && width 
-        ? (Number(length) * Number(width)) / 10000 
+      const derivedArea = length && width
+        ? (Number(length) * Number(width)) / 10000
         : null
       return {
         productId: item.productId || '',
@@ -1326,7 +1083,7 @@ function addSelectedProducts() {
   // Get all products (from both sources) that are selected
   const allProducts = [...products.value, ...productsFromSearch.value]
   const selected = allProducts.filter((product) => selectedProductIds.value.includes(product.id))
-  
+
   selected.forEach((product) => {
     addProductToInvoice(product, 1)
   })
@@ -1590,8 +1347,8 @@ function buildPreviewHtml(payload: {
           </thead>
           <tbody>
             ${payload.items
-              .map(
-                (item) => `
+      .map(
+        (item) => `
             <tr>
               <td>
                 <div style="font-weight:600;color:#0f172a;">${item.productName}</div>
@@ -1603,8 +1360,8 @@ function buildPreviewHtml(payload: {
               <td>${formatCurrency(item.total)}</td>
             </tr>
           `
-              )
-              .join('')}
+      )
+      .join('')}
           </tbody>
         </table>
 
@@ -1700,7 +1457,7 @@ async function submitInvoice(sendEmail: boolean) {
       method,
       body: payload
     }) as any
- 
+
     const updatedId = isEdit.value
       ? activeInvoiceId.value || response?.invoice?._id
       : response?.invoice?._id
