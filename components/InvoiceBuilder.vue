@@ -1184,17 +1184,19 @@ async function loadInvoiceForEdit() {
     form.items = (invoice.items || []).map((item: any) => {
       const length = item.length ?? null
       const width = item.width ?? null
-      const derivedArea = length && width ? Number(length) * Number(width) : null
+      // Calculate area from cm to m² (divide by 10000)
+      const derivedArea = length && width 
+        ? (Number(length) * Number(width)) / 10000 
+        : null
       return {
-        productId: item.productId || crypto.randomUUID(),
+        productId: item.productId || '',
         productName: item.productName || '',
         description: item.description || '',
         quantity: item.quantity ?? (derivedArea ? 1 : 0),
         price: Number(item.price) || 0,
-        sizeLabel: item.sizeLabel ?? '',
         length: length !== undefined ? length : null,
         width: width !== undefined ? width : null,
-        area: item.area ?? (derivedArea ? Number(derivedArea.toFixed(2)) : null),
+        area: item.area ?? (derivedArea ? Number(derivedArea.toFixed(4)) : null),
         origin: item.origin ?? ''
       }
     })

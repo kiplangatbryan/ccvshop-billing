@@ -201,7 +201,7 @@
                   size="small"
                   variant="text"
                   color="primary"
-                  :to="`/invoices/${getItemData(item)._id}/edit`"
+                  :to="`/invoices/edit/${getItemData(item)._id}`"
                 >
                   <VIcon>mdi-pencil</VIcon>
                 </VBtn>

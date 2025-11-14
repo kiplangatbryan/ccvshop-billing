@@ -12,4 +12,3 @@ const route = useRoute()
 const invoiceId = computed(() => String(route.params.id || ''))
 </script>
 
-

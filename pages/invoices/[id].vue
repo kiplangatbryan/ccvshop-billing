@@ -212,7 +212,7 @@
         <VBtn
           v-if="invoice.status === 'draft'"
           color="primary"
-          :to="`/invoices/${invoice._id}/edit`"
+          :to="`/invoices/edit/${invoice._id}`"
         >
           Edit Invoice
         </VBtn>
