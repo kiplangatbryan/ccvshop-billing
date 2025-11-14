@@ -9,7 +9,7 @@ const router = useRouter()
 
 onMounted(() => {
   if (user.value) {
-    router.push('/invoices')
+    router.push('/dashboard')
   } else {
     router.push('/login')
   }

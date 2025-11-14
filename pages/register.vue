@@ -111,7 +111,7 @@ const handleRegister = async () => {
 
   try {
     await register(name.value, email.value, password.value)
-    await router.push('/invoices')
+    await router.push('/dashboard')
   } catch (err: any) {
     error.value = err.data?.message || 'Registration failed. Please try again.'
   } finally {

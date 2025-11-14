@@ -64,6 +64,7 @@ const { user, logout } = useAuth()
 const router = useRouter()
 
 const navItems = [
+  { label: 'Dashboard', to: '/dashboard' },
   { label: 'Invoices', to: '/invoices' },
   { label: 'Create Invoice', to: '/invoices/create' },
   { label: 'Company Settings', to: '/settings/company' }

@@ -98,7 +98,7 @@ const handleLogin = async () => {
 
   try {
     await login(email.value, password.value)
-    await router.push('/invoices')
+    await router.push('/dashboard')
   } catch (err) {
     const e = err as LoginError
     error.value = e.data?.message || 'Login failed. Please check your credentials.'

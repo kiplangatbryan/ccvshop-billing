@@ -269,7 +269,7 @@
 
                   <div v-else class="tw-space-y-4">
                     <VCard v-for="(item, index) in form.items" :key="index" variant="outlined"
-                      class="tw-rounded-2xl tw-space-y-4">
+                      class="card-shell tw-space-y-4">
                       <VCardText class="tw-space-y-4">
                         <div class="tw-flex tw-flex-wrap tw-items-start tw-gap-4">
                           <div class="tw-flex-1">

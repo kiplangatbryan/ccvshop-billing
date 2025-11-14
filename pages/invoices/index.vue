@@ -14,8 +14,8 @@
       <VSheet
         v-for="card in summaryCards"
         :key="card.label"
-        elevation="1"
-        class="tw-rounded-3xl tw-border tw-border-gray-200 tw-bg-white tw-p-6 tw-shadow-sm tw-flex tw-flex-col tw-gap-4 tw-transition-shadow hover:tw-shadow-md"
+        elevation="0"
+        class="card-shell tw-flex tw-flex-col tw-gap-4"
       >
         <div class="tw-flex tw-items-start tw-justify-between">
           <div>
