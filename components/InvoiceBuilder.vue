@@ -528,7 +528,7 @@
           <div class="tw-flex-1 tw-space-y-1">
             <h3 class="tw-text-xl tw-font-semibold tw-text-gray-900">Import from CCV Shop</h3>
             <p class="tw-text-sm tw-text-gray-500">
-              Browse your CCV catalogue and add a single unit to this invoice with one click.
+              Search by product number or name, select products from the list, and add them to your invoice.
             </p>
           </div>
           <VBtn icon="mdi-close" variant="text" color="primary" @click="showProductSelector = false" />
@@ -555,87 +555,76 @@
           width="4"
         />
 
-        <div class="tw-flex tw-flex-wrap tw-justify-between tw-items-center tw-gap-3">
-          <div>
-            <p class="tw-text-xs tw-font-semibold tw-uppercase tw-text-gray-500">Select a product</p>
-            <p class="tw-text-sm tw-text-gray-500">Tap cards to select multiple products, then add them all at once.</p>
-          </div>
-
+        <div class="tw-space-y-4">
           <VTextField
             v-model="productSearch"
-            label="Search catalogue"
+            label="Search by product number or name"
             variant="outlined"
-            rounded="xl"
             density="comfortable"
             color="primary"
             prepend-inner-icon="mdi-magnify"
             clearable
-            class="tw-w-full md:tw-w-72"
+            placeholder="Enter product number or name to search"
+            @update:model-value="debouncedProductSearch"
+            class="tw-w-full"
           />
-        </div>
 
-        <div v-if="filteredProducts.length === 0 && !loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
-          No products match your search.
-        </div>
+          <div v-if="filteredProducts.length === 0 && !loadingProducts" class="tw-text-center tw-text-sm tw-text-gray-500 tw-py-10">
+            <p v-if="productSearch">No products match your search.</p>
+            <p v-else>No products available.</p>
+          </div>
 
-        <div v-else>
-          <VItemGroup v-model="selectedProductIds" multiple>
-            <VItem
-              v-for="product in filteredProducts"
-              :key="product.id"
-              :value="product.id"
-              v-slot="{ isSelected, toggle }"
-            >
-              <VSheet
-                class="tw-rounded-3xl tw-border tw-transition tw-shadow-sm hover:tw-shadow-lg tw-cursor-pointer tw-overflow-hidden tw-h-full"
-                :class="isSelected ? 'tw-border-primary tw-ring-2 tw-ring-primary/70 tw-bg-primary/5' : 'tw-border-gray-100 hover:tw-border-primary'"
-                @click="toggle"
+          <div v-else class="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden">
+            <VList density="comfortable" class="tw-p-0">
+              <VListItem
+                v-for="product in filteredProducts"
+                :key="product.id"
+                :value="product.id"
+                :active="selectedProductIds.includes(product.id)"
+                @click="toggleProductSelection(product.id)"
+                class="tw-cursor-pointer hover:tw-bg-gray-50"
               >
-                <div class="tw-flex tw-items-start tw-gap-3 tw-px-4 tw-pt-4">
-                  <div
-                    class="tw-h-12 tw-w-12 tw-rounded-2xl tw-flex tw-items-center tw-justify-center tw-text-primary tw-font-semibold"
-                    :class="isSelected ? 'tw-bg-white' : 'tw-bg-primary/10'"
-                  >
-                    {{ productInitial(product) }}
-                  </div>
-                  <div class="tw-flex-1 tw-space-y-1">
-                    <div class="tw-flex tw-items-start tw-justify-between tw-gap-3">
-                      <div>
-                        <h4 class="tw-font-semibold tw-text-gray-900 tw-text-base">{{ product.name }}</h4>
-                        <p class="tw-text-sm tw-text-gray-500">
-                          {{ formatCurrency(product.price, form.currency) }}
-                          <span v-if="product.sku" class="tw-text-xs tw-text-gray-400 tw-ml-2">SKU • {{ product.sku }}</span>
-                        </p>
-                      </div>
-                      <VIcon v-if="isSelected" color="primary">mdi-check-circle</VIcon>
-                    </div>
+                <template #prepend>
+                  <VCheckbox
+                    :model-value="selectedProductIds.includes(product.id)"
+                    @click.stop="toggleProductSelection(product.id)"
+                    color="primary"
+                    hide-details
+                  />
+                </template>
+                
+                <VListItemTitle class="tw-font-semibold tw-text-gray-900">
+                  {{ product.name }}
+                </VListItemTitle>
+                
+                <VListItemSubtitle class="tw-mt-1">
+                  <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-text-sm">
+                    <span class="tw-font-medium tw-text-gray-700">
+                      {{ formatCurrency(product.price, form.currency) }}
+                    </span>
+                    <span v-if="product.id" class="tw-text-gray-500">
+                      Product ID: {{ product.id }}
+                    </span>
+                    <span v-if="product.sku" class="tw-text-gray-500">
+                      SKU: {{ product.sku }}
+                    </span>
                     <VChip
                       v-if="product.stock !== undefined"
                       size="small"
                       :color="product.stock > 0 ? 'success' : 'warning'"
                       variant="flat"
+                      class="tw-text-xs"
                     >
                       {{ product.stock > 0 ? `${product.stock} in stock` : 'On request' }}
                     </VChip>
                   </div>
-                </div>
-                <div class="tw-px-4 tw-pb-4 tw-pt-3 tw-space-y-4">
-                  <p v-if="product.description" class="tw-text-sm tw-text-gray-500 tw-line-clamp-3">
+                  <p v-if="product.description" class="tw-text-xs tw-text-gray-400 tw-mt-1 tw-line-clamp-2">
                     {{ product.description }}
                   </p>
-                  <VBtn
-                    block
-                    :color="isSelected ? 'primary' : 'secondary'"
-                    variant="flat"
-                    class="tw-font-semibold tw-rounded-full tw-py-3"
-                    @click.stop="toggle"
-                  >
-                    {{ isSelected ? 'Selected' : 'Select' }}
-                  </VBtn>
-                </div>
-              </VSheet>
-            </VItem>
-          </VItemGroup>
+                </VListItemSubtitle>
+              </VListItem>
+            </VList>
+          </div>
         </div>
       </VCardText>
       <VCardActions class="tw-px-6 tw-py-4 tw-border-t tw-border-gray-100 tw-justify-end">
@@ -963,7 +952,17 @@ let productsLoaded = false
 const selectedProductIds = ref<string[]>([])
 
 const productSearch = ref('')
+const searchDebounceTimer = ref<NodeJS.Timeout | null>(null)
+const productSearchByNumber = ref(false)
+const productsFromSearch = ref<any[]>([])
+
+// Filtered products - can be from local search or API search
 const filteredProducts = computed(() => {
+  // If we have a productnumber search, show products from API search
+  if (productSearchByNumber.value && productsFromSearch.value.length > 0) {
+    return productsFromSearch.value
+  }
+  // Otherwise use local filtering
   if (!productSearch.value) {
     return products.value
   }
@@ -972,15 +971,72 @@ const filteredProducts = computed(() => {
     return (
       product?.name?.toLowerCase().includes(term) ||
       product?.description?.toLowerCase().includes(term) ||
-      product?.sku?.toLowerCase().includes(term)
+      product?.sku?.toLowerCase().includes(term) ||
+      product?.id?.toLowerCase().includes(term)
     )
   })
 })
 
+// Debounced product search for API calls
+function debouncedProductSearch() {
+  if (searchDebounceTimer.value) {
+    clearTimeout(searchDebounceTimer.value)
+  }
+  
+  searchDebounceTimer.value = setTimeout(async () => {
+    const searchTerm = productSearch.value.trim()
+    
+    if (!searchTerm) {
+      productSearchByNumber.value = false
+      productsFromSearch.value = []
+      // Reload full list if search is cleared
+      if (products.value.length === 0) {
+        await loadProducts()
+      }
+      return
+    }
+    
+    // Check if search looks like a product number (numeric or alphanumeric)
+    const looksLikeProductNumber = /^[A-Z0-9\-_]+$/i.test(searchTerm)
+    
+    if (looksLikeProductNumber) {
+      // Search by product number via API
+      productSearchByNumber.value = true
+      loadingProducts.value = true
+      try {
+        const response = await $fetch('/api/ccv/products', {
+          query: { productnumber: searchTerm }
+        })
+        productsFromSearch.value = response?.products || []
+      } catch (error) {
+        console.error('Error searching products by number:', error)
+        productsFromSearch.value = []
+      } finally {
+        loadingProducts.value = false
+      }
+    } else {
+      // Regular name search - use local filtering
+      productSearchByNumber.value = false
+      productsFromSearch.value = []
+    }
+  }, 500) // 500ms debounce
+}
+
+function toggleProductSelection(productId: string) {
+  const index = selectedProductIds.value.indexOf(productId)
+  if (index > -1) {
+    selectedProductIds.value.splice(index, 1)
+  } else {
+    selectedProductIds.value.push(productId)
+  }
+}
+
 const hasSelectedProducts = computed(() => selectedProductIds.value.length > 0)
-const selectedProducts = computed(() =>
-  products.value.filter((product) => selectedProductIds.value.includes(product.id))
-)
+const selectedProducts = computed(() => {
+  // Combine products from both sources
+  const allProducts = [...products.value, ...productsFromSearch.value]
+  return allProducts.filter((product) => selectedProductIds.value.includes(product.id))
+})
 
 onMounted(async () => {
   if (isEdit.value) {
@@ -1004,12 +1060,21 @@ onMounted(async () => {
 watch(
   () => showProductSelector.value,
   async (isOpen) => {
-    if (isOpen && !productsLoaded) {
-      await loadProducts(true)
+    if (isOpen) {
+      // Always load products when modal opens to show full list
+      if (!productsLoaded || products.value.length === 0) {
+        await loadProducts(true)
+      }
     }
     if (!isOpen) {
       selectedProductIds.value = []
       productSearch.value = ''
+      productSearchByNumber.value = false
+      productsFromSearch.value = []
+      if (searchDebounceTimer.value) {
+        clearTimeout(searchDebounceTimer.value)
+        searchDebounceTimer.value = null
+      }
     }
   }
 )
@@ -1258,11 +1323,18 @@ function addProductToInvoice(product: any, quantity = 1) {
 function addSelectedProducts() {
   if (!hasSelectedProducts.value) return
 
-  selectedProducts.value.forEach((product) => {
+  // Get all products (from both sources) that are selected
+  const allProducts = [...products.value, ...productsFromSearch.value]
+  const selected = allProducts.filter((product) => selectedProductIds.value.includes(product.id))
+  
+  selected.forEach((product) => {
     addProductToInvoice(product, 1)
   })
 
   selectedProductIds.value = []
+  productSearch.value = ''
+  productSearchByNumber.value = false
+  productsFromSearch.value = []
   showProductSelector.value = false
 }
 

@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const invoices = await getCollection<Invoice>('invoices')
-    const objectIds = invoiceIds.map(id => toObjectId(id)).filter(Boolean)
+    const objectIds = invoiceIds.map(id => toObjectId(id)).filter((id): id is NonNullable<typeof id> => id !== null)
 
     if (objectIds.length !== invoiceIds.length) {
       throw createError({
@@ -62,29 +62,123 @@ export default defineEventHandler(async (event) => {
     )
 
     // Update product stock for all invoices
-    const stockUpdates: Promise<boolean>[] = []
+    // First, aggregate quantities by product to handle same product in multiple invoices
+    const productQuantities = new Map<string, number>()
     for (const invoice of invoicesToUpdate) {
       for (const item of invoice.items) {
-        try {
-          const { fetchCCVProducts } = await import('../../utils/ccvShop')
-          const products = await fetchCCVProducts()
-          const product = products.find(p => p.id === item.productId)
-
-          if (product && product.stock !== undefined) {
-            const newStock = product.stock - item.quantity
-            if (newStock >= 0) {
-              stockUpdates.push(updateCCVProductStock(item.productId, newStock))
-            } else {
-              console.warn(`Insufficient stock for product ${item.productId}. Current: ${product.stock}, Required: ${item.quantity}`)
-            }
-          }
-        } catch (error) {
-          console.error(`Error updating stock for product ${item.productId}:`, error)
+        if (item.productId) {
+          const currentQty = productQuantities.get(String(item.productId)) || 0
+          productQuantities.set(String(item.productId), currentQty + (item.quantity || 1))
         }
       }
     }
 
-    await Promise.all(stockUpdates)
+    // Fetch products once
+    const { fetchCCVProducts } = await import('../../utils/ccvShop')
+    const products = await fetchCCVProducts()
+
+    // Update stock for each unique product
+    const stockUpdates = Array.from(productQuantities.entries()).map(async ([productId, totalQuantity]) => {
+      try {
+        const product = products.find(p => p.id === productId)
+
+        if (!product) {
+          log.warn('Product not found in CCV Shop for bulk update', { productId })
+          return { success: false, reason: 'product_not_found', productId }
+        }
+
+        const currentStock = product.stock ?? product.quantity
+        
+        // If stock tracking is disabled, mark as out of stock (set to 0)
+        if (currentStock === undefined || currentStock === null) {
+          log.info('Product stock not available - marking as out of stock (set to 0) for bulk update', { productId })
+          const updateResult = await updateCCVProductStock(productId, 0)
+          
+          if (updateResult) {
+            log.info('Successfully marked product as out of stock in CCV Shop (bulk)', { productId })
+            return {
+              success: true,
+              productId,
+              oldStock: undefined,
+              newStock: 0,
+              note: 'marked_out_of_stock'
+            }
+          } else {
+            return { success: false, reason: 'stock_not_available', productId }
+          }
+        }
+
+        const newStock = currentStock - totalQuantity
+
+        if (newStock < 0) {
+          log.warn('Insufficient stock in CCV Shop for bulk update', {
+            productId,
+            currentStock,
+            requiredQuantity: totalQuantity
+          })
+          return {
+            success: false,
+            reason: 'insufficient_stock',
+            productId,
+            currentStock,
+            requiredQuantity: totalQuantity
+          }
+        }
+
+        const updateResult = await updateCCVProductStock(productId, newStock)
+
+        if (updateResult) {
+          log.info('Successfully updated product stock in CCV Shop (bulk)', {
+            productId,
+            oldStock: currentStock,
+            newStock,
+            quantityReduced: totalQuantity
+          })
+          return {
+            success: true,
+            productId,
+            oldStock: currentStock,
+            newStock
+          }
+        } else {
+          log.error('Failed to update product stock in CCV Shop (bulk)', { productId })
+          return { success: false, reason: 'update_failed', productId }
+        }
+      } catch (error: any) {
+        log.error('Error updating stock for product (bulk)', {
+          productId,
+          error: error.message || error
+        })
+        return {
+          success: false,
+          reason: 'error',
+          productId,
+          error: error.message || String(error)
+        }
+      }
+    })
+
+    const results = await Promise.all(stockUpdates)
+    const successful = results.filter(r => r.success).length
+    const failed = results.filter(r => !r.success).length
+
+    log.info('Bulk stock update results', {
+      total: results.length,
+      successful,
+      failed,
+      results: results.map(r => ({
+        productId: r.productId,
+        success: r.success,
+        reason: r.reason
+      }))
+    })
+
+    if (failed > 0) {
+      log.warn('Some stock updates failed during bulk payment, but invoices were marked as paid', {
+        failedCount: failed,
+        failedItems: results.filter(r => !r.success)
+      })
+    }
 
     // Log operations
     for (const invoice of invoicesToUpdate) {

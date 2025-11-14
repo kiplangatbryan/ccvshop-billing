@@ -39,6 +39,8 @@ export interface InvoiceItem {
   width?: number
   area?: number
   origin?: string
+  stockUpdateStatus?: 'updated' | 'out_of_stock' | 'failed' | 'not_tracked' | 'insufficient_stock'
+  stockUpdateNote?: string
 }
 
 export interface PaymentRecord {
